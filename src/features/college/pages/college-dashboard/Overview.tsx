@@ -4,6 +4,8 @@ import { Doughnut } from '../../../../components/analytics/Doughnut';
 import { BarChart } from '@/components/analytics/BarChart';
 import { UpcomingEventCard } from '../../components/UpcomingEventCard';
 import { BarChart2 } from '@/components/analytics/BarChart2';
+import { CalendarComponent } from '../../components/Calendar';
+import { UpcomingPublicEventCard } from '../../components/UpcomingPublicEventCard';
 
 
 
@@ -21,7 +23,7 @@ export const Overview: React.FC = () => {
         </div>   
 
         {/* Dashboard Grid Parent */}
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-5 lg:grid-rows-11">
+        <div className="grid gap-8 md:gap-4 lg:gap-4 grid-cols-1 lg:grid-cols-5 lg:grid-rows-13">
 
             {/* The Stats Card Container */}
             <div className="w-full md:w-full lg:col-span-3 grid gap-4 place-items-center 
@@ -32,7 +34,7 @@ export const Overview: React.FC = () => {
             </div>
 
             {/* Charts & Bar Graphs Container */}
-            <div className=" lg:col-span-3 lg:row-start-2 lg:row-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className=" lg:col-span-3 lg:row-start-2 lg:row-span-4 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 lg:gap-4">
                 <div className="bg-white h-full col-span-1 sm:col-span-1 lg:col-span-1 rounded-[8px]">
                     <Doughnut />
                 </div>
@@ -77,10 +79,10 @@ export const Overview: React.FC = () => {
             </div>
 
 
-            <div className="bg-gray-200
+            <div className="h-full px-0 md:px-10 lg:px-10
                 lg:col-start-4 lg:col-span-2
-                lg:row-start-7 lg:row-span-5">
-                8
+                lg:row-start-7 lg:row-span-7 rounded-[8px]">
+                <CalendarComponent />
             </div>
 
             <div className='text-center flex justify-center items-center lg:col-start-1 lg:col-span-3
@@ -91,7 +93,7 @@ export const Overview: React.FC = () => {
             {/* Public Events Container */}
             <div className=" 
                 lg:col-start-1 lg:col-span-3
-                lg:row-start-7 lg:row-span-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                lg:row-start-7 lg:row-span-5 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 lg:gap-4">
                 <div className="bg-white h-full col-span-1 sm:col-span-1 lg:col-span-1 rounded-[8px]">
                     <UpcomingEventCard />
                 </div>
@@ -101,6 +103,13 @@ export const Overview: React.FC = () => {
                 <div className="bg-white h-full col-span-1 sm:col-span-1 lg:col-span-1 rounded-[8px]">
                     <UpcomingEventCard />
                 </div>
+            </div>
+
+            <div className=" 
+                lg:col-start-1 lg:col-span-3
+                lg:row-start-12 lg:row-span-2 gap-4 bg-amber-100">
+                <UpcomingPublicEventCard />
+
             </div>
 
         </div>

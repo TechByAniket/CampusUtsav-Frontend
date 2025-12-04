@@ -16,7 +16,7 @@ export const CollegeDashboardLayout = () => {
   const pageTitle: string = pageTitles[location.pathname] ?? "";
 
   return (
-    <div className="flex w-full h-screen">
+    <div className="flex w-full min-h-screen">
       
       {/* Sidebar (hidden on small screens) */}
       <aside className="hidden lg:flex flex-col w-64 bg-gray-900 text-white p-4">
