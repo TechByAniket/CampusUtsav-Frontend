@@ -4,7 +4,7 @@ import React from 'react'
 
 export const UpcomingEventCard = () => {
   return (
-    <div className='w-full h-full flex flex-col justify-center items-center rounded-[8px]'>
+    <div className='w-full h-full flex flex-col justify-center items-center rounded-[8px] cursor-pointer'>
     
     {/* Image with padding added */}
     <div className="relative w-full h-full px-3 py-2"> 
@@ -28,10 +28,6 @@ export const UpcomingEventCard = () => {
             <span className='text-sm font-semibold'>CSI</span>
         </div>
     </div>
-
-    {/* <div className='h-[20%] w-full md:py-2 px-5 md:px-2 text-sm'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit officiis totam dolore aut neque expedita cum.
-    </div> */}
 
     <div className='w-full py-6 md:py-2 px-4 md:px-2 flex flex-col gap-4'>
         <div className='flex'> 

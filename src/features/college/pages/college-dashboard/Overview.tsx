@@ -4,7 +4,7 @@ import { Doughnut } from '../../../../components/analytics/Doughnut';
 import { BarChart } from '@/components/analytics/BarChart';
 import { UpcomingEventCard } from '../../components/UpcomingEventCard';
 import { BarChart2 } from '@/components/analytics/BarChart2';
-import { CalendarComponent } from '../../components/Calendar';
+import { CalendarComponent } from '../../components/CalendarComponent';
 import { UpcomingPublicEventCard } from '../../components/UpcomingPublicEventCard';
 
 
@@ -16,7 +16,7 @@ export const Overview: React.FC = () => {
     <section className="mx-auto p-2 min-h-screen w-full bg-gray-100 rounded-[8px]">
 
         {/* Search + Filters */}
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-4">
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-10">
 
             <div className="bg-amber-100">SearchBar</div>
             <div className="bg-amber-300">Filters</div>
