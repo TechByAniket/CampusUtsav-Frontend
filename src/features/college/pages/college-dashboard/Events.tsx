@@ -1,8 +1,7 @@
-
-import React from 'react'
+import { sampleEvents, upcomingEvents } from '@/services/eventService'
 import { UpcomingEventCard } from '../../components/UpcomingEventCard'
 import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
+
 
 
 export const Events = () => {
@@ -22,23 +21,17 @@ export const Events = () => {
             <div className="bg-amber-300">Filters</div>
         </div> 
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-12'>
-          <div className=' rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out'>
-            <UpcomingEventCard />
-          </div>
-          <div className=' rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out'>
-            <UpcomingEventCard />
-          </div>
-          <div className=' rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out'>
-            <UpcomingEventCard />
-          </div>
-          <div className=' rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out'>
-            <UpcomingEventCard />
-          </div>
-          <div className=' rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out'>
-            <UpcomingEventCard />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-12">
+          {sampleEvents.map((event) => (
+            <div
+              key={event.id}
+              className="rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out"
+            >
+              <UpcomingEventCard {...event} />
+            </div>
+          ))}
         </div>
+
 
         <div className='text-center'>
           Pagination 

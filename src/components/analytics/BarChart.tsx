@@ -1,4 +1,3 @@
-import React from 'react'
 import { LabelList, ResponsiveContainer } from 'recharts'
 import { BarChart as RechartBarChart } from 'recharts';
 import {
@@ -22,18 +21,18 @@ const data = [
   { name: "MESA", value: 280 },
 ];
 
-const COLORS = [
-  "#F59E0B", // Golden Yellow – Primary / Important slice
-  "#3B82F6", // Blue – Calm / Standard slice
-  "#10B981", // Green – Growth / Success slice
-  "#EF4444", // Red – Attention / Alerts slice
-  "#8B5CF6", // Purple – Extra / Special slice
-  "#F97316", // Orange – Secondary slice
-  "#6366F1", // Indigo – Another category
-  "#14B8A6", // Teal – Supporting slice
-  "#E879F9", // Pink – Optional / Misc
-  "#6B7280", // Gray – Neutral / Base
-];
+// const COLORS = [
+//   "#F59E0B", // Golden Yellow – Primary / Important slice
+//   "#3B82F6", // Blue – Calm / Standard slice
+//   "#10B981", // Green – Growth / Success slice
+//   "#EF4444", // Red – Attention / Alerts slice
+//   "#8B5CF6", // Purple – Extra / Special slice
+//   "#F97316", // Orange – Secondary slice
+//   "#6366F1", // Indigo – Another category
+//   "#14B8A6", // Teal – Supporting slice
+//   "#E879F9", // Pink – Optional / Misc
+//   "#6B7280", // Gray – Neutral / Base
+// ];
 
 
 export const BarChart = () => {

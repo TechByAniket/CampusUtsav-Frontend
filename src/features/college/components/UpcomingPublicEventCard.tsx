@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button'
 import { CalendarDays } from 'lucide-react'
-import React from 'react'
 
 export const UpcomingPublicEventCard = () => {
   return (

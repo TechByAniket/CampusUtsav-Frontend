@@ -1,66 +1,105 @@
 import type { Student } from '@/services/studentService'
-import React from 'react'
 
 type StudentsInfoListProps = {
     students : Student[]
 }
 
-export const StudentsInfoList = ({students} : StudentsInfoListProps) => {
+export const StudentsInfoList = ({ students }: StudentsInfoListProps) => {
   return (
-    <section className='w-full min-h-screen px-2'>
+    <section className="w-full min-h-screen px-2">
 
-        {/* Mobile (Grid / Cards) */}
-      <div className="sm:hidden grid gap-1 bg-white">
-        {students.map((s) => (
-          <div key={s.regId} className="p-4 grid grid-cols-3 grid-rows-3 border rounded-lg bg-white">
-            <p className="col-span-2 row-start-1 text-black font-semibold">{s.name}</p>
-            <p className="col-span-1 row-start-1 text-black font-semibold">{s.collegeUid}</p>
-            <p className="col-span-1 row-start-2 text-black font-semibold">{s.collegeUid}</p>
-            <p className="col-span-1 row-start-2 text-black font-semibold">{s.collegeUid}</p>
-            <p className="col-span-1 row-start-2 text-black font-semibold">{s.collegeUid}</p>
-            <p className="col-span-1 row-start-3 text-black font-semibold">{s.collegeUid}</p>
-            <p className="col-span-1 row-start-3 text-black font-semibold">{s.collegeUid}</p>
-            <p className="col-span-1 row-start-3 text-black font-semibold">{s.collegeUid}</p>
-          </div>
-        ))}
+      {/* Mobile (Grid / Cards) */}
+      <div className="sm:hidden grid gap-3">
+  {students.map((s) => (
+    <div
+      key={s.regId}
+      className="p-4 rounded-[8px] bg-white text-sm hover:scale-105 transition-all"
+    >
+      {/* Name */}
+      <p className="font-semibold text-black text-base mb-2">{s.name}</p>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-400">Reg ID</span>
+          <span className="text-black font-medium">{s.regId}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-400">UID</span>
+          <span className="text-black font-medium">{s.collegeUid}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-400">Year</span>
+          <span className="text-black font-medium">{s.year}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-400">Branch</span>
+          <span className="text-black font-medium">{s.branch}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-400">Division</span>
+          <span className="text-black font-medium">{s.division}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-xs text-gray-400">Roll No</span>
+          <span className="text-black font-medium">{s.rollNo}</span>
+        </div>
       </div>
+    </div>
+  ))}
+</div>
+
+
+
 
       {/* Desktop (Table) */}
-      <div className="hidden sm:block bg-white">
-        <table className="w-full bg-white rounded-[8px]">
-          <thead>
-            <tr className="text-left border-gray-200 border-b-[0.5px]">
-              <th className="p-2">Sr No.</th>
-              <th className="p-2">Reg ID</th>
-              <th className="p-2">UID</th>
-              <th className="p-2">Name</th>
-              <th className="p-2">Year</th>
-              <th className="p-2">Branch</th>
-              <th className="p-2">Divison</th>
-              <th className="p-2">Roll No</th>
-              <th className="p-2">Phone</th>
-              <th className="p-2">Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((s) => (
-              <tr key={s.regId} className="border-b">
-                <td className="p-2">{s.srNo}</td>
-                <td className="p-2">{s.regId}</td>
-                <td className="p-2">{s.collegeUid}</td>
-                <td className="p-2">{s.name}</td>
-                <td className="p-2">{s.year}</td>
-                <td className="p-2">{s.branch}</td>
-                <td className="p-2">{s.division}</td>
-                <td className="p-2">{s.rollNo}</td>
-                <td className="p-2">{s.phone}</td>
-                <td className="p-2">{s.email}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <div className="hidden sm:block">
+  <div className="overflow-x-auto">
+    <table className="min-w-full bg-white rounded-xl shadow-md overflow-hidden">
+      <thead className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
+        <tr>
+          <th className="p-3 text-left text-sm font-semibold">Sr No.</th>
+          <th className="p-3 text-left text-sm font-semibold">Reg ID</th>
+          <th className="p-3 text-left text-sm font-semibold">UID</th>
+          <th className="p-3 text-left text-sm font-semibold">Name</th>
+          <th className="p-3 text-left text-sm font-semibold">Year</th>
+          <th className="p-3 text-left text-sm font-semibold">Branch</th>
+          <th className="p-3 text-left text-sm font-semibold">Division</th>
+          <th className="p-3 text-left text-sm font-semibold">Roll No</th>
+          <th className="p-3 text-left text-sm font-semibold">Phone</th>
+          <th className="p-3 text-left text-sm font-semibold">Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {students.map((s) => (
+          <tr
+            key={s.regId}
+            className="border-b last:border-none hover:bg-orange-50 transition-colors"
+          >
+            <td className="p-3 text-black">{s.srNo}</td>
+            <td className="p-3 text-black">{s.regId}</td>
+            <td className="p-3 text-black">{s.collegeUid}</td>
+            <td className="p-3 text-black font-medium">{s.name}</td>
+            <td className="p-3 text-black">{s.year}</td>
+            <td className="p-3 text-black">{s.branch}</td>
+            <td className="p-3 text-black">{s.division}</td>
+            <td className="p-3 text-black">{s.rollNo}</td>
+            <td className="p-3 text-black">{s.phone}</td>
+            <td className="p-3 text-black">{s.email}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
     </section>
-    
-  )
-}
+  );
+};

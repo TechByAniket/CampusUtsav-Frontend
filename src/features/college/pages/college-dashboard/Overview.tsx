@@ -6,6 +6,7 @@ import { UpcomingEventCard } from '../../components/UpcomingEventCard';
 import { BarChart2 } from '@/components/analytics/BarChart2';
 import { CalendarComponent } from '../../components/CalendarComponent';
 import { UpcomingPublicEventCard } from '../../components/UpcomingPublicEventCard';
+import { sampleEvents } from '@/services/eventService';
 
 
 
@@ -91,18 +92,21 @@ export const Overview: React.FC = () => {
             </div>
 
             {/* Public Events Container */}
-            <div className=" 
+            <div
+            className="
                 lg:col-start-1 lg:col-span-3
-                lg:row-start-7 lg:row-span-5 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 lg:gap-4">
-                <div className="bg-white h-full col-span-1 sm:col-span-1 lg:col-span-1 rounded-[8px]">
-                    <UpcomingEventCard />
+                lg:row-start-7 lg:row-span-5
+                grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 lg:gap-4
+            "
+            >
+            {sampleEvents.map((event) => (
+                <div
+                key={event.id}
+                className="bg-white h-full col-span-1 rounded-[8px]"
+                >
+                <UpcomingEventCard {...event} />
                 </div>
-                <div className="bg-white h-full col-span-1 sm:col-span-1 lg:col-span-1 rounded-[8px]">
-                    <UpcomingEventCard />
-                </div>
-                <div className="bg-white h-full col-span-1 sm:col-span-1 lg:col-span-1 rounded-[8px]">
-                    <UpcomingEventCard />
-                </div>
+            ))}
             </div>
 
             <div className=" 

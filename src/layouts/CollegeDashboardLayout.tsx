@@ -10,7 +10,7 @@ export const CollegeDashboardLayout = () => {
     "/college-dashboard/overview": "Overview",
     "/college-dashboard/events": "Events",
     "/college-dashboard/students": "Students",
-    "/college-dashboard/settings": "Settings",
+    "/college-dashboard/clubs": "Clubs",
   };
 
   const pageTitle: string = pageTitles[location.pathname] ?? "";
@@ -29,11 +29,11 @@ export const CollegeDashboardLayout = () => {
           <Link to="/college-dashboard/events" className="block p-2 rounded hover:bg-gray-800">
             Events
           </Link>
+          <Link to="/college-dashboard/clubs" className="block p-2 rounded hover:bg-gray-800">
+            Clubs
+          </Link>
           <Link to="/college-dashboard/students" className="block p-2 rounded hover:bg-gray-800">
             Students
-          </Link>
-          <Link to="/college-dashboard/settings" className="block p-2 rounded hover:bg-gray-800">
-            Settings
           </Link>
         </nav>
       </aside>

@@ -1,6 +1,5 @@
 import { Input } from '@/components/ui/input'
 import { students } from '@/services/studentService'
-import React from 'react'
 import { StudentsInfoList } from '../../components/StudentsInfoList'
 
 export const Students = () => {

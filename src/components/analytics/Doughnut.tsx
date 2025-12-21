@@ -41,7 +41,7 @@ export const Doughnut = () => {
               paddingAngle={0} // no gap in slices
               dataKey="value"
             >
-              {data.map((entry, index) => (
+              {data.map((entry,index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index]} />
               ))}
             </Pie> 

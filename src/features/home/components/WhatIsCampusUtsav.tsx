@@ -1,5 +1,3 @@
-import { Section } from 'lucide-react'
-import React from 'react'
 
 export const WhatIsCampusUtsav = () => {
   return (

@@ -1,5 +1,4 @@
-import React from 'react';
-// ... other imports
+
 
 export const HowItWorks = () => {
   return (

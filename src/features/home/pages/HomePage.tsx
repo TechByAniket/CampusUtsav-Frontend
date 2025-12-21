@@ -1,5 +1,4 @@
 import { DefaultLayout } from '@/layouts/DefaultLayout'
-import React from 'react'
 import { HeroSection } from '../components/HeroSection'
 import { WhatIsCampusUtsav } from '../components/WhatIsCampusUtsav'
 import { WhyCampusUtsav } from '../components/WhyCampusUtsav'

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
 
 export const Navbar = () => {
   return (
@@ -18,9 +19,12 @@ export const Navbar = () => {
 
         {/* Button */}
         <div className="ml-4">
-          <Button className="bg-accent hover:bg-accentLight text-accent-foreground">
-            Login
-          </Button>
+          <Link to={'/auth/sign-in'}>
+            <Button className="bg-accent hover:bg-accentLight text-accent-foreground rounded-[8px]">
+              Login
+            </Button>
+          </Link>
+          
         </div>
       </div>
     </nav>
