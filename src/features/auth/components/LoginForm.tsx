@@ -1,4 +1,11 @@
-import { Link } from "react-router-dom";
+import { collegeLogin } from "@/services/authService";
+import { type AppDispatch } from "@/store";
+import { setCredentials } from "@/store/slices/authSlice";
+import type { LoginProps } from "@/types/auth";
+import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface LoginFormProps {
   title: string;
@@ -11,6 +18,37 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   subtitle,
   placeholder,
 }) => {
+
+  const {
+  register,
+  handleSubmit,
+  formState: { errors, isSubmitting },
+} = useForm<LoginProps>();
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+
+
+ const handleLogin = async (data: LoginProps) => {
+  try {
+    const response = await collegeLogin(data);
+
+    dispatch(setCredentials({
+      token: response.token,
+      role: response.role
+    }));
+
+    toast.success("Login successful!");
+    navigate("/college-dashboard/overview");
+
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || "Login failed");
+  }
+};
+
+
+
+
   return (
     <>
       <div className="text-center">
@@ -18,14 +56,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
       </div>
 
-      <form className="space-y-4">
+      <form
+        onSubmit={handleSubmit(handleLogin)}
+        className="space-y-4"
+      >
         <div>
           <label className="text-sm font-medium">Email</label>
           <input
-            type="text"
+            type="email"
             placeholder={placeholder}
-            className="w-full mt-1 px-3 py-2 border rounded-[8px] focus:outline-none focus:ring-1 focus:ring-black"
+            {...register("email", {
+              required: "Email is required",
+            })}
+            className="w-full mt-1 px-3 py-2 border rounded-[8px]
+              focus:outline-none focus:ring-1 focus:ring-black"
           />
+          {errors.email && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.email.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -33,21 +83,29 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <input
             type="password"
             placeholder="••••••••"
-            className="w-full mt-1 px-3 py-2 border rounded-[8px] focus:outline-none focus:ring-1 focus:ring-black"
+            {...register("password", {
+              required: "Password is required",
+            })}
+            className="w-full mt-1 px-3 py-2 border rounded-[8px]
+              focus:outline-none focus:ring-1 focus:ring-black"
           />
+          {errors.password && (
+            <p className="text-xs text-red-500 mt-1">
+              {errors.password.message}
+            </p>
+          )}
         </div>
-
-        {/* <div className="text-right text-sm text-orange-500 cursor-pointer">
-          Trouble signing in?
-        </div> */}
 
         <button
           type="submit"
-          className="w-full bg-primary text-white py-2 rounded-[8px] font-semibold hover:bg-primaryDark transition"
+          disabled={isSubmitting}
+          className="w-full bg-primary text-white py-2 rounded-[8px]
+            font-semibold hover:bg-primaryDark transition disabled:opacity-60"
         >
-          Sign In
+          {isSubmitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
+
 
       <div className="text-center text-sm mt-2">
         Don’t have an account?{" "}

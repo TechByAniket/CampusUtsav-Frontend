@@ -135,3 +135,39 @@ export const upcomingEvents: UpcomingEventCardProps[] = [
     time: "9:00 AM - 6:00 PM",
   },
 ]
+
+
+export const eventRequests = [
+    {
+      id: "1",
+      title: "Tech Fest 2025",
+      club: "Coding Club",
+      date: "12 Jan 2025",
+      requestDate: "05 Jan 2025",
+      status: "pending",
+    },
+    {
+      id: "2",
+      title: "Cultural Night",
+      club: "Dance Club",
+      date: "18 Jan 2025",
+      requestDate: "10 Jan 2025",
+      status: "needs-change",
+    },
+    {
+      id: "3",
+      title: "AI Workshop",
+      club: "AI Society",
+      date: "20 Jan 2025",
+      requestDate: "15 Jan 2025",
+      status: "approved",
+    },
+    {
+      id: "4",
+      title: "SpringBoot Exclusive Workshop",
+      club: "Google Developer Groups - GDG",
+      date: "20 Jan 2025",
+      requestDate: "15 Jan 2025",
+      status: "rejected",
+    },
+  ]

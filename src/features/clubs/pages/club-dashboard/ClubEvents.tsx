@@ -1,10 +1,10 @@
-import { sampleEvents } from '@/services/eventService'
-import { UpcomingEventCard } from '../../components/UpcomingEventCard'
+import { sampleEvents} from '@/services/eventService'
 import { Input } from '@/components/ui/input'
+import { UpcomingEventCard } from '@/features/college/components/UpcomingEventCard'
 
 
 
-export const Events = () => {
+export const ClubEvents = () => {
   return (
     // Main Container
     <section className="mx-auto p-2 min-h-screen w-full bg-gray-100 rounded-[8px]">

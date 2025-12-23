@@ -1,0 +1,29 @@
+// accountMenu.ts
+import { User, LogOut, Settings } from "lucide-react";
+
+export interface AccountMenuItem {
+  label: string;
+  icon: React.ElementType;
+  action: "navigate" | "logout";
+  path?: string;
+}
+
+export const accountMenuItems: AccountMenuItem[] = [
+  {
+    label: "Profile",
+    icon: User,
+    action: "navigate",
+    path: "/college-dashboard/profile",
+  },
+  {
+    label: "Settings",
+    icon: Settings,
+    action: "navigate",
+    path: "/college-dashboard/settings",
+  },
+  {
+    label: "Logout",
+    icon: LogOut,
+    action: "logout",
+  },
+];

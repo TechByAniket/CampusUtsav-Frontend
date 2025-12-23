@@ -1,6 +1,15 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  Mail,
+  CalendarDays,
+  Users,
+  GraduationCap,
+} from "lucide-react"
+import { Profile } from "@/components/layout/Profile";
+
 
 export const CollegeDashboardLayout = () => {
     const location = useLocation();
@@ -8,6 +17,7 @@ export const CollegeDashboardLayout = () => {
       const pageTitles: Record<string, string> = {
     "/college-dashboard": "Overview",
     "/college-dashboard/overview": "Overview",
+    "/college-dashboard/inbox": "Inbox",
     "/college-dashboard/events": "Events",
     "/college-dashboard/students": "Students",
     "/college-dashboard/clubs": "Clubs",
@@ -15,28 +25,82 @@ export const CollegeDashboardLayout = () => {
 
   const pageTitle: string = pageTitles[location.pathname] ?? "";
 
+  const sidebarLinks = [
+  {
+    label: "Overview",
+    path: "/college-dashboard/overview",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Inbox",
+    path: "/college-dashboard/inbox",
+    icon: Mail,
+  },
+  {
+    label: "Events",
+    path: "/college-dashboard/events",
+    icon: CalendarDays,
+  },
+  {
+    label: "Clubs",
+    path: "/college-dashboard/clubs",
+    icon: Users,
+  },
+  {
+    label: "Students",
+    path: "/college-dashboard/students",
+    icon: GraduationCap,
+  },
+]
+
+
   return (
     <div className="flex w-full min-h-screen">
       
       {/* Sidebar (hidden on small screens) */}
-      <aside className="hidden lg:flex flex-col w-64 bg-gray-900 text-white p-4">
-        <h2 className="text-xl font-bold mb-6">College Panel</h2>
+      <aside className="hidden lg:flex flex-col w-72 bg-neutral-900 border-neutral-800
+ text-slate-100 border-r ">
+      
+      {/* Logo */}
+      <div className="h-20 flex items-center px-8 border-b border-slate-800">
+        <h1 className="text-2xl font-extrabold tracking-wide text-white">
+          <span className="text-orange-400">Campus</span>Utsav
+        </h1>
+      </div>
 
-        <nav className="space-y-3">
-          <Link to="/college-dashboard/overview" className="block p-2 rounded hover:bg-gray-800">
-            Overview
-          </Link>
-          <Link to="/college-dashboard/events" className="block p-2 rounded hover:bg-gray-800">
-            Events
-          </Link>
-          <Link to="/college-dashboard/clubs" className="block p-2 rounded hover:bg-gray-800">
-            Clubs
-          </Link>
-          <Link to="/college-dashboard/students" className="block p-2 rounded hover:bg-gray-800">
-            Students
-          </Link>
-        </nav>
-      </aside>
+      {/* Nav */}
+      <nav className="flex-1 px-4 py-8 space-y-2">
+        {sidebarLinks.map((item) => {
+          const isActive = location.pathname === item.path
+          const Icon = item.icon
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`
+                group flex items-center gap-4 px-5 py-3 rounded-xl
+                text-base font-medium transition-all
+                ${
+                  isActive
+                    ? "bg-slate-800 text-white shadow-md"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }
+              `}
+            >
+              <Icon
+                className={`w-5 h-5 ${
+                  isActive
+                    ? "text-orange-400"
+                    : "text-slate-400 group-hover:text-orange-400"
+                }`}
+              />
+              {item.label}
+            </Link>
+          )
+        })}
+      </nav>
+    </aside>
 
       {/* Right side main content */}
       <div className="flex-1 flex flex-col">
@@ -48,15 +112,7 @@ export const CollegeDashboardLayout = () => {
           <h1 className="text-2xl font-semibold">{pageTitle}</h1>
 
           {/* RIGHT: Profile */}
-          <Button variant="ghost" className="flex items-center gap-2">
-            <Avatar className="h-10 w-10 border">
-              <AvatarImage src="https://www.kindpng.com/picc/m/497-4973038_profile-picture-circle-png-transparent-png.png" />
-            </Avatar>
-            <div className="flex flex-col">
-                <span className="hidden left-0 sm:block">My Account</span>
-                <span className="hidden left-0 sm:block">College Admin</span>
-            </div>
-          </Button>
+          <Profile />
 
         </header>
 
