@@ -1,10 +1,10 @@
 import type { Club } from "@/types/club";
 
-interface ClubHeroProps {
-  club: Club;
-}
+// interface ClubHeroProps {
+//   club: Club;
+// }
 
-export const ClubHero: React.FC<ClubHeroProps> = ({ club }) => {
+export const ClubHero = ({ club }) => {
   return (
     <div className="relative h-[260px] rounded-2xl overflow-hidden">
       <img

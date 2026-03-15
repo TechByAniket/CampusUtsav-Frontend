@@ -9,7 +9,7 @@ import { CallToAction } from '../components/CallToAction'
 
 export const HomePage = () => {
   return (
-    <DefaultLayout>
+    <>
         <HeroSection />
         <WhatIsCampusUtsav />
         <WhyCampusUtsav />
@@ -17,6 +17,6 @@ export const HomePage = () => {
         <CommunityStats />
         <Testimonial />
         <CallToAction />
-    </DefaultLayout>
+    </>
   )
 }

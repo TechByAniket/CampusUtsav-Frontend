@@ -1,31 +1,98 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-interface AuthState {
-  token: string | null;
-  role?: string | null;
+/* =======================
+   Types
+======================= */
+
+interface StudentSummary {
+  id: number;
+  name: string;
+  email: string;
+  rollNo: string;
+  year: string;
+  branch: string;
 }
 
-const initialState: AuthState = {
-  token: localStorage.getItem("token") || null,
-  role: localStorage.getItem("role") || null,
+interface AuthState {
+  token: string | null;
+  role: string | null;
+  email: string | null;
+  collegeId: number | null;
+
+  // role-based optional data
+  studentSummary: StudentSummary | null;
+}
+
+/* =======================
+   LocalStorage helper
+======================= */
+
+const persistAuth = (state: AuthState) => {
+  Object.entries(state).forEach(([key, val]) => {
+    if (val === null) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(
+        key,
+        typeof val === "object" ? JSON.stringify(val) : String(val)
+      );
+    }
+  });
 };
+
+/* =======================
+   Initial State
+======================= */
+
+const initialState: AuthState = {
+  token: localStorage.getItem("token"),
+  role: localStorage.getItem("role"),
+  email: localStorage.getItem("email"),
+  collegeId: localStorage.getItem("collegeId")
+    ? Number(localStorage.getItem("collegeId"))
+    : null,
+  studentSummary: localStorage.getItem("studentSummary")
+    ? JSON.parse(localStorage.getItem("studentSummary") as string)
+    : null,
+};
+
+/* =======================
+   Slice
+======================= */
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setCredentials: (state, action: PayloadAction<{ token: string; role: string }>) => {
-      state.token = action.payload.token;
-      state.role = action.payload.role;
+    setCredentials: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{
+        token: string;
+        role: string;
+        email: string;
+        collegeId: number;
+        studentSummary?: StudentSummary | null;
+      }>
+    ) => {
+      state.token = payload.token;
+      state.role = payload.role;
+      state.email = payload.email;
+      state.collegeId = payload.collegeId;
+      state.studentSummary = payload.studentSummary ?? null;
 
-      localStorage.setItem("token", action.payload.token);
-      localStorage.setItem("role", JSON.stringify(action.payload.role));
+      persistAuth(state);
     },
+
     logout: (state) => {
       state.token = null;
       state.role = null;
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
+      state.email = null;
+      state.collegeId = null;
+      state.studentSummary = null;
+
+      persistAuth(state);
     },
   },
 });

@@ -69,14 +69,14 @@ export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
         bg-black
       "
     >
-      {/* Full Poster (NO CROPPING) */}
+      {/* Full Poster */}
       <img
         src={event.posterUrl}
         alt={event.title}
         className="absolute inset-0 w-full h-full object-contain object-center"
       />
 
-      {/* FULL Gradient Overlay (top → bottom) */}
+      {/* Gradient Overlay */}
       <div
         className="
           absolute inset-0
@@ -87,35 +87,40 @@ export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
 
       {/* Event Details */}
       <div className="absolute bottom-0 w-full p-4 flex flex-col gap-2 text-white">
+        
         {/* Category */}
         <span className="inline-block px-3 py-1 bg-white/90 text-gray-800 text-xs rounded-full font-medium w-fit">
-          {event.category}
+          {event.eventCategory}
         </span>
 
         {/* Title */}
-        <h3 className="font-bold text-white text-lg leading-tight line-clamp-1">
+        <h3 className="text-white font-bold text-lg leading-tight line-clamp-1">
           {event.title}
         </h3>
 
-        {/* Venue + Organizer (merged) */}
+        {/* Venue + Club */}
         <div className="flex items-center gap-2 text-xs text-white/90 truncate">
           <MapPin size={14} className="shrink-0" />
           <span>{event.venue}</span>
           <span className="opacity-50">•</span>
-          <span>{event.organizer.name}</span>
+          <span>{event.club.name}</span>
         </div>
 
         {/* Date & Time */}
         <div className="flex items-center gap-2 text-xs text-white/90">
           <CalendarDays size={12} />
           <div className="flex flex-col">
-            <span className="font-semibold">{event.date}</span>
-            <span className="text-[10px]">{event.time}</span>
+            <span className="font-semibold">
+              {new Date(event.date).toDateString()}
+            </span>
+            <span className="text-[10px]">
+              {event.startTime} – {event.endTime}
+            </span>
           </div>
         </div>
 
         {/* CTA */}
-        <Link to={`/college-dashboard/events/${event.id}`}>
+        
           <Button
             size="sm"
             className="
@@ -129,8 +134,7 @@ export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
           >
             View
           </Button>
-
-        </Link>
+        
       </div>
     </div>
   );

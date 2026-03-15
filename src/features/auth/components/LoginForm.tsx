@@ -1,5 +1,5 @@
-import { collegeLogin } from "@/services/authService";
-import { type AppDispatch } from "@/store";
+import { login } from "@/services/authService";
+import { type AppDispatch } from "@/store/store";
 import { setCredentials } from "@/store/slices/authSlice";
 import type { LoginProps } from "@/types/auth";
 import { useForm } from "react-hook-form";
@@ -29,24 +29,42 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const dispatch = useDispatch<AppDispatch>();
 
 
- const handleLogin = async (data: LoginProps) => {
+const handleLogin = async (data: LoginProps) => {
   try {
-    const response = await collegeLogin(data);
+    const response = await login(data);
 
     dispatch(setCredentials({
       token: response.token,
-      role: response.role
+      role: response.role,
+      email: response.email,
+      collegeId: response.collegeId,
+      studentSummary: response.studentSummary
     }));
 
     toast.success("Login successful!");
-    navigate("/college-dashboard/overview");
+
+    // role-based navigation
+    switch (response.role) {
+      case "ROLE_COLLEGE":
+        navigate("/college-dashboard/overview");
+        break;
+
+      case "ROLE_CLUB":
+        navigate("/club-dashboard/overview");
+        break;
+
+      case "ROLE_STUDENT":
+        navigate("/student-dashboard/home");
+        break;
+
+      default:
+        navigate("/");
+    }
 
   } catch (err: any) {
     toast.error(err.response?.data?.message || "Login failed");
   }
 };
-
-
 
 
   return (

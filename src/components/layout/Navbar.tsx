@@ -2,7 +2,7 @@ import React from 'react'
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 
-export const Navbar = () => {
+export const Navbar:React.FC = () => {
   return (
     <nav className="bg-primary text-primary-foreground">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between">
@@ -10,12 +10,20 @@ export const Navbar = () => {
         <div className="text-2xl font-bold">CampusUtsav</div>
 
         {/* Menu - hidden on mobile, flex on md */}
-        <ul className="hidden md:flex items-center gap-12 text-base font-medium">
-          <li><a href="#home" className="hover:underline">Home</a></li>
-          <li><a href="#events" className="hover:underline">Explore Events</a></li>
-          <li><a href="#about" className="hover:underline">About Us</a></li>
-          <li><a href="#developers" className="hover:underline">Developers</a></li>
-        </ul>
+       <ul className="hidden md:flex items-center gap-12 text-base font-medium">
+        <li>
+          <Link to="/" className="hover:underline">Home</Link>
+        </li>
+        <li>
+          <Link to="/explore-events" className="hover:underline">Explore Events</Link>
+        </li>
+        <li>
+          <Link to="/about" className="hover:underline">About Us</Link>
+        </li>
+        <li>
+          <Link to="/developers" className="hover:underline">Developers</Link>
+        </li>
+      </ul>
 
         {/* Button */}
         <div className="ml-4">

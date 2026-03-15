@@ -1,3 +1,9 @@
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { type RootState, type AppDispatch } from "@/store/store";
+import { logout } from "@/store/slices/authSlice";
+import { toast } from "sonner";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,16 +13,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
 import { accountMenuItems } from "@/services/userService";
-import { useDispatch } from "react-redux";
-import { type AppDispatch } from "@/store";
-import { logout } from "@/store/slices/authSlice";
-import { toast } from "sonner";
+import { LogOut, ChevronDown } from "lucide-react";
 
 export const Profile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  
+  // Pulling values from Redux authSlice
+  const { email, role, studentSummary } = useSelector((state: RootState) => state.auth);
+
+  // Logic for display name: If student, use summary name, else fallback to email prefix
+  const displayName = studentSummary?.name || email?.split('@')[0] || "Admin";
+  const displayRole = role?.replace('ROLE_', '').replace('_', ' ') || "College Admin";
 
   const handleAction = async (item: any) => {
     if (item.action === "navigate" && item.path) {
@@ -24,21 +33,14 @@ export const Profile = () => {
     }
 
     if (item.action === "logout") {
-  try {
-    // Call backend logout (optional)
-    // await logoutApi();
-
-    // Clear global state
-    dispatch(logout());
-
-    // Redirect to signin
-    navigate("/auth/sign-in");
-    
-    toast.success("Logged out successfully!");
-  } catch (err: any) {
-    toast.error(err.response?.data?.message || "Logout failed");
-  }
-}
+      try {
+        dispatch(logout());
+        navigate("/auth/sign-in");
+        toast.success("Logged out successfully");
+      } catch (err) {
+        toast.error("Logout failed");
+      }
+    }
   };
 
   return (
@@ -47,80 +49,94 @@ export const Profile = () => {
         <Button
           variant="ghost"
           className="
-            flex items-center gap-3 px-2 py-1.5 rounded-xl
-            transition-all
-            hover:bg-muted
-            focus-visible:ring-2 focus-visible:ring-orange-300
+            flex items-center gap-3 px-3 py-6 rounded-2xl
+            hover:bg-slate-100 transition-all duration-300
+            focus-visible:ring-2 focus-visible:ring-indigo-500/20
           "
         >
-          <Avatar className="h-10 w-10 border border-border shadow-sm">
-            <AvatarImage src="https://www.kindpng.com/picc/m/497-4973038_profile-picture-circle-png-transparent-png.png" />
-            <AvatarFallback className="bg-muted text-foreground">
-              CA
+          {/* Avatar with System Shadow */}
+          <Avatar className="h-9 w-9 border-2 border-white shadow-md ring-1 ring-slate-200">
+            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`} />
+            <AvatarFallback className="bg-slate-900 text-white font-black text-xs">
+              {displayName.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
-          <div className="hidden sm:flex flex-col items-start text-sm leading-tight">
-            <span className="font-medium text-foreground">
-              My Account
+          <div className="hidden md:flex flex-col items-start text-left">
+            <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-none">
+              {displayName}
             </span>
-            <span className="text-xs text-muted-foreground">
-              College Admin
+            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">
+              {displayRole}
             </span>
           </div>
+          
+          <ChevronDown size={14} className="text-slate-400 ml-1 hidden md:block" />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="end"
-        sideOffset={8}
+        sideOffset={12}
         className="
-          w-56 rounded-xl border border-border
-          bg-popover text-popover-foreground
-          p-1 shadow-xl
-          data-[state=open]:animate-in
-          data-[state=closed]:animate-out
-          data-[state=open]:fade-in-0
-          data-[state=closed]:fade-out-0
-          data-[state=open]:zoom-in-95
-          data-[state=closed]:zoom-out-95
-          data-[side=bottom]:slide-in-from-top-2
-          data-[side=top]:slide-in-from-bottom-2
+          w-64 rounded-[1.5rem] border border-slate-200
+          bg-white p-2 shadow-2xl shadow-slate-200/60
+          animate-in fade-in zoom-in-95 duration-200
         "
       >
-        {/* Header */}
-        <div className="px-3 py-2">
-          <p className="text-sm font-semibold text-foreground">
-            College Admin
+        {/* Header - Styled like a System Capsule */}
+        <div className="px-4 py-4 mb-2 bg-slate-50 rounded-2xl border border-slate-100">
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
+            Verified Account
           </p>
-          <p className="text-xs text-muted-foreground truncate">
-            admin@college.edu
+          <p className="text-sm font-black text-slate-900 truncate">
+            {email}
           </p>
+          {studentSummary?.rollNo && (
+            <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase">
+              Roll: {studentSummary.rollNo}
+            </p>
+          )}
         </div>
 
-        <DropdownMenuSeparator className="my-1 bg-border" />
+        <div className="space-y-1">
+          {accountMenuItems.map((item, index) => (
+            <div key={item.label}>
+              <DropdownMenuItem
+                onClick={() => handleAction(item)}
+                className="
+                  flex items-center gap-3 rounded-xl px-4 py-3 text-xs
+                  cursor-pointer font-black uppercase tracking-widest
+                  text-slate-600 transition-all duration-200
+                  hover:bg-slate-900 hover:text-white
+                  focus:bg-slate-900 focus:text-white
+                "
+              >
+                <item.icon className="h-4 w-4 opacity-50" />
+                <span>{item.label}</span>
+              </DropdownMenuItem>
 
-        {accountMenuItems.map((item, index) => (
-          <div key={item.label}>
-            <DropdownMenuItem
-              onClick={() => handleAction(item)}
-              className="
-                group flex items-center gap-3 rounded-lg px-3 py-2 text-sm
-                cursor-pointer transition-colors
-                text-foreground
-                hover:bg-black hover:text-white
-                focus:bg-black focus:text-white
-              "
-            >
-              <item.icon className="h-4 w-4 text-muted-foreground group-hover:text-white" />
-              <span className="font-medium">{item.label}</span>
-            </DropdownMenuItem>
+              {/* Separator logic for Logout section */}
+              {index === accountMenuItems.length - 2 && (
+                <div className="h-px bg-slate-100 my-2 mx-2" />
+              )}
+            </div>
+          ))}
 
-            {index === accountMenuItems.length - 2 && (
-              <DropdownMenuSeparator className="my-1 bg-border" />
-            )}
-          </div>
-        ))}
+          {/* Hardcoded Logout for System Safety */}
+          <DropdownMenuItem
+            onClick={() => handleAction({ action: "logout" })}
+            className="
+              flex items-center gap-3 rounded-xl px-4 py-3 text-xs
+              cursor-pointer font-black uppercase tracking-widest
+              text-red-500 hover:bg-red-50 hover:text-red-600
+              transition-all duration-200
+            "
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Logout Session</span>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

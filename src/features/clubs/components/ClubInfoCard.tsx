@@ -1,10 +1,11 @@
 import type { Club } from "@/types/club";
 
-interface ClubInfoCardProps {
-  club: Club;
-}
+// interface ClubInfoCardProps {
+//   club: Club;
+// }
 
-export const ClubInfoCard: React.FC<ClubInfoCardProps> = ({ club }) => {
+
+export const ClubInfoCard = ({ club }) => {
   return (
     <div className="bg-white border rounded-xl p-5 space-y-4">
       <h3 className="font-semibold text-gray-900">

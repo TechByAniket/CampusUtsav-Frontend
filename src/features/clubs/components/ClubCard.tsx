@@ -1,12 +1,6 @@
+import React from "react";
 
-import type { Club } from '@/types/club'
-import React from 'react'
-
-type ClubCardProps = {
-    club:Club;
-};
-
-export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
+export const ClubCard = ({ club }) => {
   return (
     <div
       className="

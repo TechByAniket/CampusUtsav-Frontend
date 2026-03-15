@@ -6,6 +6,7 @@ import { BarChart, BarChart2 } from 'lucide-react';
 import { CalendarComponent } from '@/features/college/components/CalendarComponent';
 import { UpcomingEventCard } from '@/features/college/components/UpcomingEventCard';
 import { UpcomingPublicEventCard } from '@/features/college/components/UpcomingPublicEventCard';
+import { ClubOverviewHero } from '../../components/ClubOverviewHero';
 
 
 
@@ -23,57 +24,8 @@ export const ClubOverview: React.FC = () => {
         </div>   
 
         {/* HERO / CTA SECTION */}
-<div
-  className="
-    w-full mb-8 rounded-2xl
-    bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400
-    relative overflow-hidden
-  "
->
-  {/* Overlay (future image friendly) */}
-  <div className="absolute inset-0 bg-black/10" />
+        <ClubOverviewHero />
 
-  <div
-    className="
-      relative z-10 px-6 py-10 md:px-10 md:py-14
-      flex flex-col md:flex-row items-start md:items-center
-      justify-between gap-6
-    "
-  >
-    {/* Left Content */}
-    <div className="max-w-xl text-white">
-      <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">
-        Create & Manage Your Club Events
-      </h2>
-      <p className="mt-2 text-white/90 text-sm md:text-base">
-        Publish events, track approvals, and engage students — all from one place.
-      </p>
-    </div>
-
-    {/* CTA Buttons */}
-    <div className="flex gap-4">
-      <button
-        className="
-          px-6 py-3 rounded-xl font-semibold
-          bg-black text-white hover:bg-neutral-800
-          transition
-        "
-      >
-        + Create Event
-      </button>
-
-      <button
-        className="
-          px-6 py-3 rounded-xl font-semibold
-          bg-white text-black hover:bg-neutral-100
-          transition
-        "
-      >
-        View Events
-      </button>
-    </div>
-  </div>
-</div>
 
         {/* Dashboard Grid Parent */}
         <div className="grid gap-8 md:gap-4 lg:gap-4 grid-cols-1 lg:grid-cols-5 lg:grid-rows-13">
@@ -114,27 +66,27 @@ export const ClubOverview: React.FC = () => {
 
 
             {/* Upcoming Events Container */}
-            <div className="bg-white 
+            {/* <div className="bg-white 
                 lg:col-start-4 lg:col-span-2 
                 lg:row-start-2 lg:row-span-4
                 rounded-[8px]
                 ">
                 <BarChart2 />
-            </div>
+            </div> */}
 
 
 
 
 
             <div className='text-center flex justify-center items-center lg:col-start-4 lg:col-span-2
-                lg:row-start-6'>
+                lg:row-start-2'>
                 <h3>Calender</h3>
             </div>
 
 
             <div className="h-full px-0 md:px-10 lg:px-10
                 lg:col-start-4 lg:col-span-2
-                lg:row-start-7 lg:row-span-7 rounded-[8px]">
+                lg:row-start-3 lg:row-span-7 rounded-[8px]">
                 <CalendarComponent />
             </div>
 
@@ -160,22 +112,7 @@ export const ClubOverview: React.FC = () => {
                 </div>
             ))}
             </div>
-
-            <div className=" 
-                lg:col-start-1 lg:col-span-3
-                lg:row-start-12 lg:row-span-2 gap-4 bg-amber-100">
-                <UpcomingPublicEventCard />
-
-            </div>
-
         </div>
-     
-
-    
-
-
-
-
     </section>
   );
 };

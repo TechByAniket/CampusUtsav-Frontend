@@ -1,69 +1,81 @@
-import { sampleClubs } from "@/services/clubService";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+import { getClubById, sampleClubs } from "@/services/clubService";
+import { sampleEvents } from "@/services/eventService";
+
 import { ClubAbout } from "../components/ClubAbout";
 import { ClubHero } from "../components/ClubHero";
 import { ClubInfoCard } from "../components/ClubInfoCard";
 import { ClubSocialLinks } from "../components/ClubSocialLinks";
 import { ClubStats } from "../components/ClubStats";
-import { useState } from "react";
-import type { Club } from "@/types/club";
 import { UpcomingEvents } from "../components/UpcomingEvents";
-import { sampleEvents } from "@/services/eventService";
 import { PastEvents } from "../components/PastEvents";
-import { EventCollege } from "@/features/events/components/EventCollege";
 import { CollegeCard } from "../components/CollegeCard";
-import { Tabs } from "@radix-ui/react-tabs";
-import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const ClubDetailsPage: React.FC = () => {
-  const [club, setClub] = useState<Club | null>(sampleClubs[0] || null);
-  const [loading, setLoading] = useState(false);
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-  // Filter upcoming and past events (all events for now)
-//   const upcoming = sampleEvents
-//     .filter((e) => new Date(e.date) >= new Date())
-//     .slice(0, 3);
-//   const past = sampleEvents
-//     .filter((e) => new Date(e.date) < new Date())
-//     .slice(0, 3);
+export const ClubDetailsPage = () => {
+  const { clubId } = useParams();
+  console.log("Club ID from params:", clubId);
+  const collegeId = useSelector((state) => state.auth.collegeId);
 
-  if (loading) return <p className="px-4 py-10">Loading...</p>;
+  // const [club, setClub] = useState(null);
+  const [club, setClub] = useState(sampleClubs[0] || null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!collegeId || !clubId) return;
+
+    const fetchClub = async () => {
+      setLoading(true);
+      const data = await getClubById(collegeId, Number(clubId));
+      console.log("Fetched club data:", data);
+      setClub(data);
+      setLoading(false);
+    };
+
+    fetchClub();
+  }, [collegeId, clubId]);
+
+  if (loading) return <p className="px-4 py-10">Loading club...</p>;
   if (!club) return <p className="px-4 py-10 text-red-500">Club not found</p>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
       <ClubHero club={club} />
-
       <ClubStats />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
-        <ClubAbout description={club.description} />
+          <ClubAbout description={club.description} />
 
-        {/* Events Tabs */}
-        <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid grid-cols-2 w-full md:w-1/2 lg:w-1/2 rounded-[8px] bg-black">
-                <TabsTrigger value="upcoming" className="rounded-[8px] text-white">
+          <Tabs defaultValue="upcoming" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full md:w-1/2 rounded-[8px] bg-black">
+              <TabsTrigger value="upcoming" className="text-white">
                 Upcoming Events
-                </TabsTrigger>
-                <TabsTrigger value="past" className="rounded-[8px] text-white">
+              </TabsTrigger>
+              <TabsTrigger value="past" className="text-white">
                 Past Events
-                </TabsTrigger>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="upcoming" className="pt-4">
-            <UpcomingEvents events={sampleEvents} />
+              <UpcomingEvents events={sampleEvents} />
             </TabsContent>
 
             <TabsContent value="past" className="pt-4">
-            <PastEvents events={sampleEvents} />
+              <PastEvents events={sampleEvents} />
             </TabsContent>
-        </Tabs>
-       </div>
+          </Tabs>
+        </div>
 
+        {/* RIGHT */}
         <div className="space-y-4">
           <ClubInfoCard club={club} />
-          {/* <EventCollege /> */}
-          <CollegeCard collegeId={club.collegeId} />
+          {club.college?.id && <CollegeCard collegeId={club.college.id} />}
           <ClubSocialLinks
             websiteUrl={club.websiteUrl}
             instagramUrl={club.instagramUrl}

@@ -7,6 +7,11 @@ import {
   CalendarDays,
   Users,
   GraduationCap,
+  UsersIcon,
+  UsersRound,
+  LayoutGrid,
+  Shapes,
+  Users2,
 } from "lucide-react"
 import { Profile } from "@/components/layout/Profile";
 
@@ -21,9 +26,31 @@ export const CollegeDashboardLayout = () => {
     "/college-dashboard/events": "Events",
     "/college-dashboard/students": "Students",
     "/college-dashboard/clubs": "Clubs",
+    "/college-dashboard/staff": "Staff",
+    "/college-dashboard/events/:id/registrations": "Event Registrations",
+    "/college-dashboard/events/:id/attendance": "Event Attendance",
+
   };
 
-  const pageTitle: string = pageTitles[location.pathname] ?? "";
+  const getPageTitle = (pathname: string): string => {
+    // 1. Try an exact match first (for performance)
+    if (pageTitles[pathname]) return pageTitles[pathname];
+
+    // 2. Handle dynamic segments (:id)
+    const targetKey = Object.keys(pageTitles).find((key) => {
+      if (!key.includes(':')) return false;
+
+      // Convert "/events/:id/registrations" -> "^\/events\/[^\/]+\/registrations$"
+      const pattern = new RegExp(
+        `^${key.replace(/:[^\/]+/g, '[^/]+').replace(/\//g, '\\/')}$`
+      );
+      return pattern.test(pathname);
+    });
+
+  return targetKey ? pageTitles[targetKey] : "CampusUtsav";
+};
+
+  const pageTitle: string = getPageTitle(location.pathname);
 
   const sidebarLinks = [
   {
@@ -44,12 +71,17 @@ export const CollegeDashboardLayout = () => {
   {
     label: "Clubs",
     path: "/college-dashboard/clubs",
-    icon: Users,
+    icon: Shapes,
   },
   {
     label: "Students",
     path: "/college-dashboard/students",
     icon: GraduationCap,
+  },
+  {
+    label: "Staff",
+    path: "/college-dashboard/staff",
+    icon: Users2,
   },
 ]
 

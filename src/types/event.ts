@@ -38,49 +38,70 @@ export interface UpcomingEventCardProps {
 }
 
 export type Event = {
-  id: string;
+  id: number;
 
-  /* ===== Key / Ticket UI ===== */
+  /* ===== Core Info ===== */
   title: string;
+  description: string;
   posterUrl: string;
 
-  organizerName: string;
-  clubLogoUrl: string;
-
-  status: "Upcoming" | "Completed";
-  isPaid: boolean;
-
   venue: string;
-  date: string;
-  time: string;
-  category: string;
 
-  teamSize?: string;
-  type: string;
+  date: string;        // ISO date string (yyyy-MM-dd)
+  startTime: string;   // HH:mm:ss
+  endTime: string;     // HH:mm:ss
 
-  registrationDeadline: string;
+  /* ===== Classification ===== */
+  eventCategory: string; // EventCategory enum from backend
+  eventType: string;     // EventType enum from backend
+  status: string;        // EventStatus enum
 
-  /* ===== Details Section ===== */
-  description: string;
+  /* ===== Participation ===== */
+  fees: number;
+  teamEvent: boolean;
+  teamSize: number;
+  maxParticipants: number;
+  registrationLink: string;
 
-  contact: {
+  /* ===== Metadata ===== */
+  attachments: string[];
+  tags: string[];
+  isFeatured: boolean;
+  isActive: boolean;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  websiteUrl?: string;
+
+  /* ===== Contact ===== */
+  contactDetails: Array<{
+    name: string;
     phone: string;
     email: string;
-  };
+  }>;
+  // example:
+  // {
+  //   "John Doe": { "phone": "9999999999" }
+  // }
 
-  organizer: {
+  /* ===== Club ===== */
+  club: {
+    id: number;
     name: string;
-    subtitle?: string;
     logoUrl: string;
   };
 
-  collegeName: string;
-  collegeMeta: string;
+  college:{
+    name: string;
+    shortForm:string;
+    logoUrl?:string;
+    address?:string;
+    instagramUrl?:string;
+    websiteUrl?:string;
+    linkedinUrl?:string;  
+  }
 
-  socials: {
-    instagram?: string;
-    twitter?: string;
-    linkedin?: string;
-    website?: string;
-  };
+  /* ===== Extra ===== */
+  extraInfo?: string; // JSON string
+  registrationDeadline?: string; // ISO date string 
 };
+

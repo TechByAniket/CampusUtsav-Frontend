@@ -1,4 +1,4 @@
-import { collegeAdminSchema, collegeAuthSchema, collegeIdentitySchema, collegeLocationSchema, collegeOnlinePresenceSchema, collegeSteps, type CollegeFormData, type Step } from "@/schemas/college.schema"
+import { collegeSteps, type CollegeFormData, type Step } from "@/schemas/college.schema"
 import { useState } from "react";
 
 // /* -------------------------------------------------

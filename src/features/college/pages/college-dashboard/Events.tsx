@@ -1,6 +1,7 @@
 import { sampleEvents } from '@/services/eventService'
 import { UpcomingEventCard } from '../../components/UpcomingEventCard'
 import { Input } from '@/components/ui/input'
+import { Link } from 'react-router-dom'
 
 
 
@@ -27,7 +28,9 @@ export const Events = () => {
               key={event.id}
               className="rounded-[8px] bg-white hover:border-primary hover:bg-primary/5 hover:scale-[1.01] transition-all duration-300 ease-out"
             >
-              <UpcomingEventCard {...event} />
+              <Link to={`/college-dashboard/events/${event.id}`} >
+                <UpcomingEventCard {...event} />
+              </Link>
             </div>
           ))}
         </div>

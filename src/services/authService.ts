@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// ***********COLLEGE LOGIN AUTH SERVICE ***********
-export const collegeLogin = async (data: {
+// ***********LOGIN AUTH SERVICE ***********
+export const login = async (data: {
   email: string;
   password: string;
 }) => {
