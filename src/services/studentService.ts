@@ -1,3 +1,6 @@
+import axios from "axios";
+import { handleServiceError } from "@/utils/errorUtils";
+
 export type Student = {
   srNo: number
   regId: string
@@ -11,6 +14,14 @@ export type Student = {
   phone: string
 }
 
+export const registerStudent = async (data: any) => {
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/student/register`, data);
+    return res.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Student Registration Failed"));
+  }
+}
 
 export const students: Student[] = [
   {

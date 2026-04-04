@@ -1,22 +1,23 @@
-import { Input } from '@/components/ui/input'
-import { students } from '@/services/studentService'
 import { StaffInfoList } from '../../components/StaffInfoList'
+import { FileCard } from '@/components/common/FileCard'
+
 
 export const Staff = () => {
   return (
-    <section className="mx-auto p-2 min-h-screen w-full bg-gray-100 rounded-[8px]">
+    <div className="w-full">
 
         {/* Search Bar & Filters  */}
         
 
         <div className='w-full min-h-screen'>
-            <StaffInfoList students = {students} />
+            <StaffInfoList />
         </div>
+        <FileCard url="https://drive.google.com/file/d/1uLO9ojCX5LQWS3cBX_1MhB4KzsarlbeH/view?usp=sharing" />
 
         <div className='text-center'>
           Pagination 
         </div>
 
-    </section>
-  )
-}
+    </div>
+  );
+};

@@ -3,9 +3,10 @@ import { Phone, Mail, Search, X, Shield, Star, CheckCircle, UserCircle, IdCard, 
 import { fetchAvailableRoles, fetchAccountStatuses, fetchStaffMembers, updateStaffRole, updateStaffStatus, updateStaffClubAssignment } from '@/services/staffService';
 import { getClubsByCollege} from '@/services/clubService'; 
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 
 export const StaffInfoList = () => {
-  const [activeTab, setActiveTab] = useState('PENDING');
+  const [activeTab, setActiveTab] = useState('ACTIVE');
   const [facultyList, setFacultyList] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,6 +19,8 @@ export const StaffInfoList = () => {
   const [pendingStatusChanges, setPendingStatusChanges] = useState({});
   const [pendingClubChanges, setPendingClubChanges] = useState({});
 
+  const collegeId = useSelector((state) => state.auth.collegeId);
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -25,20 +28,20 @@ export const StaffInfoList = () => {
           fetchStaffMembers(),
           fetchAvailableRoles(),
           fetchAccountStatuses(),
-          getClubsByCollege()
+          getClubsByCollege(collegeId)
         ]);
         setFacultyList(staff);
         setAvailableRoles(roles);
         setAvailableStatuses(statuses);
         setClubs(clubList);
-      } catch (err) {
-        toast.error("Error loading system data");
+      } catch (err: any) {
+        toast.error(err.message);
       }
     };
     getData();
   }, []);
 
-  const handleUpdateStatusDatabase = async (id) => {
+  const handleUpdateStatusDatabase = async (id: number | string) => {
     const newStatus = pendingStatusChanges[id];
     try {
       await updateStaffStatus(id, newStatus);
@@ -47,13 +50,12 @@ export const StaffInfoList = () => {
       const updated = { ...pendingStatusChanges }; delete updated[id];
       setPendingStatusChanges(updated);
       toast.success("Status Updated!");
-    } catch (err) { 
-      const errorMsg = err.response?.data?.message || err.response?.data || "Update failed";
-      toast.error(errorMsg); 
+    } catch (err: any) { 
+      toast.error(err.message); 
     }
   };
 
-  const handleUpdateRoleDatabase = async (id) => {
+  const handleUpdateRoleDatabase = async (id: number | string) => {
     const newRole = pendingRoleChanges[id];
     try {
       await updateStaffRole(id, newRole);
@@ -62,13 +64,12 @@ export const StaffInfoList = () => {
       const updated = { ...pendingRoleChanges }; delete updated[id];
       setPendingRoleChanges(updated);
       toast.success("Role Updated!");
-    } catch (err) { 
-      const errorMsg = err.response?.data?.message || err.response?.data || "Update failed";
-      toast.error(errorMsg); 
+    } catch (err: any) { 
+      toast.error(err.message); 
     }
   };
 
-  const handleUpdateClubDatabase = async (id) => {
+  const handleUpdateClubDatabase = async (id: number | string) => {
     const clubId = pendingClubChanges[id];
     try {
       await updateStaffClubAssignment(id, clubId === "NONE" ? null : clubId);
@@ -96,9 +97,8 @@ export const StaffInfoList = () => {
       const updated = { ...pendingClubChanges }; delete updated[id];
       setPendingClubChanges(updated);
       toast.success("Club Assignment Updated!");
-    } catch (err) { 
-      const errorMsg = err.response?.data?.message || err.response?.data || "Update failed";
-      toast.error(errorMsg); 
+    } catch (err: any) { 
+      toast.error(err.message); 
     }
   };
 
@@ -108,8 +108,7 @@ export const StaffInfoList = () => {
   );
 
   return (
-    <section className="w-full min-h-screen bg-[#F8FAFC] py-6 px-4 md:px-8 font-sans">
-      <div className="max-w-[1600px] mx-auto">
+    <div className="w-full font-sans">
 
         {/* --- HEADER --- */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -237,9 +236,8 @@ export const StaffInfoList = () => {
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* --- ENHANCED MODAL --- */}
+        {/* --- ENHANCED MODAL --- */}
       {selectedFaculty && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
           <div className="w-full max-w-xl bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-y-auto max-h-[90vh] no-scrollbar">
@@ -340,7 +338,7 @@ export const StaffInfoList = () => {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 

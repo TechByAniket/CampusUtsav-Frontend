@@ -1,113 +1,199 @@
-
-import type { Event} from '@/types/event'
-
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { sampleEvents } from '@/services/eventService'
-import { EventKeyDetails } from '../components/EventKeyDetails'
-import { EventDescription } from '../components/EventDescription'
-import { EventContact } from '../components/EventContact'
-import { EventOrganizer } from '../components/EventOrganizer'
-// import { EventCollege } from '../components/EventCollege'
-import { EventSocialShare } from '../components/EventSocialShare'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+import { 
+  Info, Clock, 
+  CreditCard, Users2, 
+  UserCircle2, LayoutDashboard,
+  ChevronLeft
+} from 'lucide-react'
+
+import type { AdminEventDetail } from '@/types/event'
+import { getEventDetailsByEventId } from '@/services/eventService'
 import type { RootState } from '@/store/store'
 import { Button } from '@/components/ui/button'
 
-export const AdminEventDetailsPage: React.FC = () => {
+// Components
+import { 
+  BentoHeroPoster, BentoHeroDetail 
+} from '../new-components/BentoComponents'
+import { EventDetailCriteria } from '../new-components/EventDetailCriteria'
+import { EventDetailAttachments } from '../new-components/EventDetailAttachments'
+import { EventDetailOrganizer } from '../new-components/EventDetailOrganizer'
+import { AdminEventActions } from '../new-components/AdminEventActions'
+
+export const AdminEventDetailsPage = () => {
   const { id } = useParams<{ id: string }>()
-  const [event, setEvent] = useState<Event | null>(null)
+  const navigate = useNavigate()
+  const [event, setEvent] = useState<AdminEventDetail | null>(null)
   const [loading, setLoading] = useState(true)
 
   const role = useSelector((state: RootState) => state.auth.role)
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false)
-      return
+    const fetchEventDetails = async () => {
+      if (!id) return
+      setLoading(true)
+      try {
+        const data = await getEventDetailsByEventId(Number(id))
+        setEvent(data)
+      } catch (err: any) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false)
+      }
     }
 
-    const foundEvent = sampleEvents.find(
-      (e) => e.id === Number(id) // ✅ FIX
-    )
-
-    setEvent(foundEvent ?? null)
-    setLoading(false)
+    fetchEventDetails()
   }, [id])
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading event details...
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-6 bg-white font-sans">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-xl shadow-indigo-100" />
+        <p className="text-slate-400 font-black text-[11px] uppercase tracking-[0.4em]">Propagating intelligence...</p>
       </div>
     )
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Event not found
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-8 px-4 text-center bg-white font-sans">
+        <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center text-slate-200 shadow-sm">
+           <Info size={40} />
+        </div>
+        <div className="space-y-2">
+           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Record Not Found</h2>
+           <p className="text-slate-400 font-medium max-w-sm mx-auto text-sm leading-relaxed uppercase tracking-[0.1em]">Intelligence database returned null.</p>
+        </div>
+        <Button onClick={() => navigate(-1)} variant="outline" className="rounded-2xl px-12 h-14 font-black uppercase text-xs tracking-widest border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+           Go Back to Console
+        </Button>
       </div>
     )
   }
 
-  /* ===== Date & Time Logic (FIXED) ===== */
-  const now = new Date()
-
-  const startTime = new Date(`${event.date}T${event.startTime}`)
-  const endTime = new Date(`${event.date}T${event.endTime}`)
-
-  const minutesToStart =
-    (startTime.getTime() - now.getTime()) / (1000 * 60)
-
-  const isWithinAttendanceWindow =
-    minutesToStart <= 30 && now <= endTime
+  const coreStats = [
+    { label: "Entry", value: event.fees === 0 ? "FREE" : `₹${event.fees}`, icon: CreditCard, color: "emerald" },
+    { label: "Participation", value: `${event.maxParticipants} slots`, icon: Users2, color: "indigo" },
+    { label: "Type", value: event.teamEvent ? `${event.teamSize} MEMBER` : "Individual", icon: UserCircle2, color: "amber" },
+    { label: "Time", value: `${event.startTime?.slice(0, 5)} - ${event.endTime?.slice(0, 5)}`, icon: Clock, color: "rose" }
+  ];
 
   return (
-    <section className="mx-auto p-2 min-h-screen w-full bg-gray-100 rounded-[8px]">
-
-      {/* Event header */}
-      <EventKeyDetails {...event} />
-
-      {/* Action bar (role-based) */}
-      {role !== "ROLE_STUDENT" && (
-        <div className="mt-4 flex justify-end gap-4">
-          <Link to={`/college-dashboard/events/${event.id}/analytics`}>
-            <Button className="bg-indigo-600 text-white px-5 py-2 rounded-xl hover:bg-indigo-700 transition">
-              Analytics
-            </Button>
-          </Link>
-
-          <Link to={`/college-dashboard/events/${event.id}/registrations`}>
-            <Button className="bg-indigo-600 text-white px-5 py-2 rounded-xl hover:bg-indigo-700 transition">
-              Registrations
-            </Button>
-          </Link>
-
-          <Link to={`/college-dashboard/events/${event.id}/attendance`}>
-            <Button className="bg-indigo-600 text-white px-5 py-2 rounded-xl hover:bg-indigo-700 transition">
-              Attendance
-            </Button>
-          </Link>
-        </div>
-      )}
-
-      {/* Main content */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Left */}
-        <div className="lg:col-span-2">
-          
-            <EventDescription description={event.description} />
-          
+    <section className="w-full min-h-screen bg-white py-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
+      <div className="max-w-[1550px] mx-auto space-y-12">
+        
+        {/* Navigation & Header Summary */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-1 border-b border-slate-100/80">
+              <button 
+                onClick={() => navigate(-1)}
+                className="group flex items-center gap-3 text-slate-400 hover:text-indigo-600 transition-all"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center group-hover:border-indigo-200 group-hover:bg-indigo-50 transition-all shadow-sm">
+                  <ChevronLeft size={22} />
+                </div>
+              </button>
         </div>
 
-        {/* Right */}
-        <div className="space-y-5">
-            <EventContact contactDetails={event.contactDetails} />
-            <EventOrganizer organizer={event} />
-            {/* <EventSocialShare /> */}
-          
+        {/* --- MAIN HERO PHASE --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch pt-2">
+           {/* Visual Identity */}
+           <div className="lg:col-span-4 h-full">
+              <BentoHeroPoster 
+                url={event.posterUrl} 
+                title={event.title}
+              />
+           </div>
+
+           {/* Primary Identity & Internal Intel Summary */}
+           <div className="lg:col-span-8 flex flex-col h-full">
+              <BentoHeroDetail 
+                title={event.title}
+                status={event.status}
+                category={event.eventCategory}
+                venue={event.venue}
+                stats={coreStats}
+                date={event.date}
+                deadline={event.registrationDeadline}
+                eventId={event.id}
+                teamSize={event.teamSize}
+              />
+           </div>
+        </div>
+
+        {/* --- MANAGEMENT MODULE --- */}
+        {role !== "ROLE_STUDENT" && (
+           <div className="w-full">
+              <AdminEventActions status={event.status} />
+           </div>
+        )}
+
+        {/* --- ROW 4: DETAILED OPERATIONAL MODULES --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pt-2">
+           
+           {/* Detailed Information (Left Column) */}
+           <div className="lg:col-span-8 space-y-10">
+              {/* Mission Briefing / Description */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden"
+              >
+                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/10">
+                    <div className="flex items-center gap-4">
+                       <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-lg shadow-indigo-100" />
+                       <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Mission Overview</h3>
+                    </div>
+                    <LayoutDashboard size={22} className="text-slate-400" />
+                 </div>
+                 <div className="p-8 lg:p-11">
+                    <p className="text-slate-600 font-medium leading-[1.85] whitespace-pre-line text-lg tracking-tight">
+                      {event.description}
+                    </p>
+                 </div>
+              </motion.div>
+
+              {/* Support & Coordination (Now on Left) */}
+              <EventDetailOrganizer 
+                club={event.club}
+                contactDetails={event.contactDetails}
+              />
+           </div>
+
+           {/* Sidebar: Logistics & Authority (Right Column) */}
+           <div className="lg:col-span-4 space-y-10">
+              {/* Eligibility Matrix */}
+              <EventDetailCriteria 
+                allowedBranches={event.allowedBranches}
+                allowedYears={event.allowedYears}
+                isBento={false}
+              />
+
+              {/* Asset Management (Resources - Now on Right Sidebar) */}
+              <EventDetailAttachments 
+                 publicAttachments={event.publicAttachments}
+                 privateAttachments={event.privateAttachments}
+                 isBento={false}
+              />
+           </div>
+        </div>
+
+        {/* Global Branding Footer */}
+        <div className="pt-28 pb-16 flex flex-col items-center justify-center space-y-6">
+           <div className="w-14 h-14 rounded-3xl bg-white border border-slate-200 flex items-center justify-center text-slate-300 shadow-xl shadow-slate-100/50">
+              <Info size={24} />
+           </div>
+           <div className="text-center space-y-2">
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">CampusUtsav Intelligence Console</p>
+              <div className="flex items-center justify-center gap-3">
+                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">© 2026 Institutional Framework</span>
+                 <span className="w-2 h-2 bg-slate-100 rounded-full" />
+                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">v5.2.0 Active Alpha</span>
+              </div>
+           </div>
         </div>
       </div>
     </section>

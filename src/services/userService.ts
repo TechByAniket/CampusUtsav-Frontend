@@ -13,17 +13,12 @@ export const accountMenuItems: AccountMenuItem[] = [
     label: "Profile",
     icon: User,
     action: "navigate",
-    path: "/college-dashboard/profile",
+    path: "/user/profile",
   },
   {
     label: "Settings",
     icon: Settings,
     action: "navigate",
-    path: "/college-dashboard/settings",
-  },
-  {
-    label: "Logout",
-    icon: LogOut,
-    action: "logout",
+    path: "/user/settings",
   },
 ];

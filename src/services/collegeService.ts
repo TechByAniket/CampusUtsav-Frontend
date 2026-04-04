@@ -1,5 +1,35 @@
 import type { College } from "@/types/college";
+import axios from "axios";
+import { handleServiceError } from "@/utils/errorUtils";
 
+export const getAllBranchesOfCollege = async (collegeId: number | string) =>{
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/public/colleges/${collegeId}/branches`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Fetching College Branches"));    
+  }
+}
+
+// ************ GET ALL REGISTERED COLLEGES ************ //
+export const getAllRegisteredColleges = async () =>{
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/public/colleges`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Fetching Institutional Registry"));    
+  }
+}
+
+// ************ GET ALL OFFICIAL DOMAINS OF COLLEGE ********** //
+export const getAllOfficialDomainsOfCollege = async (collegeId: number | string) =>{
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/public/colleges/${collegeId}/official-domains`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Fetching Verified Domains"));    
+  }
+}
 
 export const sampleColleges: College[] = [
   {

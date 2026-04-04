@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, BadgeInfo, Calendar, Users, Image, Phone } from "lucide-react";
 import { EventBasicForm } from "./components/EventBasicForm";
 import { EventScheduleForm } from "./components/EventScheduleForm";
-import { EventRegistrationForm } from "./components/EventRegistrationForm";
+import { EventRegistrationForm } from "./new-components/EventRegistrationForm";
 import { EventTeamForm } from "./components/EventTeamForms";
 import { EventMediaForm } from "./components/EventMediaForm";
 import { EventMetaForm } from "./components/EventMetaForm";

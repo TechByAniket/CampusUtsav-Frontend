@@ -6,7 +6,7 @@ import { UpcomingEventCard } from '../../components/UpcomingEventCard';
 import { BarChart2 } from '@/components/analytics/BarChart2';
 import { CalendarComponent } from '../../components/CalendarComponent';
 import { UpcomingPublicEventCard } from '../../components/UpcomingPublicEventCard';
-import { sampleEvents } from '@/services/eventService';
+
 
 
 

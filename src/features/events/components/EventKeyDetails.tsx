@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Calendar, Clock, MapPin, Users, Tag, AlertCircle, ArrowRight, Share2, X } from "lucide-react";
 import type { Event } from "@/types/event";
 import { Link } from "react-router-dom";
-import { EventRegistrationForm } from "@/forms/events/EventRegistrationForm";
+import { EventRegistrationForm } from "@/forms/new-events/EventRegistrationForm";
 
 type EventKeyDetailsProps = Event;
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { sampleEvents } from '@/services/eventService';
+// import { sampleEvents } from '@/services/eventService';
 import { StatCard } from '@/features/college/components/StatCard';
 import { Doughnut } from '@/components/analytics/Doughnut';
 import { BarChart, BarChart2 } from 'lucide-react';

@@ -11,8 +11,6 @@ const tabAnimation = {
   transition: { duration: 0.2, ease: "easeInOut" },
 };
 
-
-
 export const SignIn: React.FC = () => {
   return (
     <div className="space-y-6">

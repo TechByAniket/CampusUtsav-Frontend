@@ -1,93 +1,170 @@
-import React, { useState, useMemo } from 'react';
-import { UpcomingEventCard } from '@/features/college/components/UpcomingEventCard';
+import { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import { Sparkles, AlertCircle, Info } from 'lucide-react';
 
-import { sampleEvents } from '@/services/eventService';
-import { DefaultLayout } from '@/layouts/DefaultLayout';
-import { FeaturedEvents } from '../components/FeaturedEvents';
-import { Link } from 'react-router-dom';
+import { getAllEventsByCollege } from '@/services/eventService';
+import type { EventSummary } from '@/types/event';
+import type { RootState } from '@/store/store';
+import { EventListCard } from '@/features/events/new-components/EventListCard';
+import { EventFilterBar } from '@/features/events/new-components/EventFilterBar';
 
-export const ExploreEventsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+export const ExploreEventsPage = () => {
+  const navigate = useNavigate();
+  const collegeId = useSelector((state: RootState) => state.auth.collegeId);
+  
+  const [events, setEvents] = useState<EventSummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("ALL");
+  const [activeStatus, setActiveStatus] = useState("ALL");
 
-  const categories = ['All', 'Cultural', 'Technical', 'Sports', 'Workshop', 'Competition'];
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (!collegeId) return;
+      setLoading(true);
+      try {
+        const data = await getAllEventsByCollege(collegeId);
+        setEvents(data || []);
+      } catch (err: any) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, [collegeId]);
 
-  const { featuredEvents, filteredEvents } = useMemo(() => {
-    const featured = sampleEvents.filter(e => e.isFeatured);
-    const filtered = sampleEvents.filter(event => {
-      const matchesTab = activeTab === 'All' || event.eventCategory === activeTab;
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesTab && matchesSearch;
+  const filteredEvents = useMemo(() => {
+    return events.filter(e => {
+      const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           e.clubNameShortForm.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           e.venue.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = activeCategory === "ALL" || e.eventCategory === activeCategory;
+      const matchesStatus = activeStatus === "ALL" || e.status === activeStatus;
+
+      return matchesSearch && matchesCategory && matchesStatus;
     });
-    return { featuredEvents: featured, filteredEvents: filtered };
-  }, [activeTab, searchQuery]);
+  }, [events, searchQuery, activeCategory, activeStatus]);
+
+  if (!collegeId) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-8 px-4 text-center bg-white font-sans">
+        <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-200 shadow-sm shadow-slate-100">
+           <Info size={40} />
+        </div>
+        <div className="space-y-3">
+           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Access Restricted</h2>
+           <p className="text-slate-400 font-medium max-w-sm mx-auto text-sm leading-relaxed uppercase tracking-[0.1em]">
+             There are no public events available at this time. <br />
+             <span className="text-indigo-600 font-bold">Please log in</span> to explore your campus activity.
+           </p>
+        </div>
+        <button 
+          onClick={() => navigate('/auth/sign-in')}
+          className="px-12 h-14 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 active:scale-95"
+        >
+           Log In Here
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-6 bg-white font-sans">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-xl shadow-indigo-100" />
+        <p className="text-slate-400 font-black text-[11px] uppercase tracking-[0.4em]">Propagating intelligence...</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="min-h-screen bg-[#FCFCFC] text-[#0F172A] pb-20 font-sans selection:bg-[#EA580C] selection:text-white">
+    <section className="w-full min-h-screen bg-white py-12 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
+      <div className="max-w-6xl mx-auto space-y-12">
         
-        <div className="max-w-7xl mx-auto px-6 pt-12">
-          
-          {/* --- REFINED HEADER SECTION --- */}
-          <header className="mb-14">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-              <div className="space-y-2">
-                <h1 className="text-5xl lg:text-6xl font-[1000] tracking-tighter text-[#0F172A] leading-none">
-                  The Campus <span className="text-[#EA580C]">Pulse</span>
-                </h1>
-                <p className="text-[#64748B] text-lg font-medium max-w-md leading-relaxed">
-                  Discover, engage, and excel. Your gateway to the most anticipated workshops, fests, and competitions.
-                </p>
-              </div>
-
-              {/* Wider and Shorter Search Bar */}
-              <div className="relative group w-full md:w-[450px]">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-[#94A3B8] group-focus-within:text-[#EA580C] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Find your next experience..."
-                  className="w-full pl-11 pr-4 py-2.5 bg-[#F1F5F9] border border-transparent rounded-xl text-[#0F172A] placeholder-[#94A3B8] focus:bg-white focus:ring-4 focus:ring-[#EA580C]/10 focus:border-[#EA580C] transition-all outline-none font-medium shadow-sm"
-                />
-              </div>
-            </div>
-          </header>
-
-          {/* --- DYNAMIC FEATURED SECTION --- */}
-          <FeaturedEvents events={featuredEvents} />
-
-          {/* --- TABS & GRID --- */}
-          <div className="mb-10 flex items-center gap-6 overflow-x-auto no-scrollbar border-b border-[#F1F5F9]">
-            {categories.map((cat) => (
-              <button 
-                key={cat} 
-                onClick={() => setActiveTab(cat)} 
-                className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeTab === cat ? 'text-[#EA580C]' : 'text-[#94A3B8] hover:text-[#0F172A]'}`}
-              >
-                {cat}
-                {activeTab === cat && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#EA580C]" />}
-              </button>
-            ))}
+        {/* Header Phase */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-50">
+          <div className="space-y-4">
+             <div className="inline-flex items-center gap-3 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-100/50 shadow-sm animate-pulse">
+                <Sparkles size={14} /> Campus Event Portal
+             </div>
+             <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter leading-none uppercase">
+                Explore <br />
+                <span className="text-indigo-600/30">Events</span>
+             </h1>
           </div>
+          <div className="flex items-center gap-4 text-slate-300">
+             <p className="text-[11px] font-black uppercase tracking-widest leading-none">
+               {filteredEvents.length} Events Found
+             </p>
+          </div>
+        </header>
 
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredEvents.map((event, index) => (
-              <div key={index} className="transition-transform duration-300 hover:-translate-y-2">
-                <Link to={`/explore-events/events/${event.id}`} >
-                  <UpcomingEventCard {...event} />
-                </Link>
+        {/* Global Filter Array */}
+        <EventFilterBar 
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          activeStatus={activeStatus}
+          onStatusChange={setActiveStatus}
+        />
+
+        {/* Discovery Grid */}
+        <AnimatePresence mode="popLayout">
+          {filteredEvents.length > 0 ? (
+            <motion.div 
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            >
+              {filteredEvents.map((event) => (
+                <EventListCard 
+                  key={event.id} 
+                  event={event} 
+                  onClick={() => navigate(`events/${event.id}`)}
+                />
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-32 flex flex-col items-center text-center space-y-8 bg-slate-50/10 rounded-[4rem] border border-slate-100"
+            >
+              <div className="w-24 h-24 bg-white border border-slate-100 rounded-[3rem] flex items-center justify-center text-slate-200 shadow-sm">
+                 <AlertCircle size={48} />
               </div>
-            ))}
-          </section>
-        </div>
+              <div className="space-y-3">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">No Events Found</h3>
+                <p className="text-slate-400 font-medium max-w-sm mx-auto text-sm uppercase tracking-widest leading-relaxed">No events match your current search or filter criteria. <br />Try adjusting your settings.</p>
+              </div>
+              <button 
+                onClick={() => { setSearchQuery(""); setActiveCategory("ALL"); setActiveStatus("ALL"); }}
+                className="px-10 py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-xl shadow-slate-100"
+              >
+                Clear all filters
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Global Footer Summary */}
+        <footer className="pt-32 pb-16 flex flex-col items-center justify-center space-y-6">
+           <div className="text-center space-y-2">
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">Campus Utsav Event Management System</p>
+              <div className="flex items-center justify-center gap-3">
+                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">© 2026 Campus Utsav Team</span>
+                 <span className="w-2 h-2 bg-slate-100 rounded-full" />
+                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Official Institutional Portal</span>
+              </div>
+           </div>
+        </footer>
       </div>
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-      </>
-    
+    </section>
   );
 };
+;

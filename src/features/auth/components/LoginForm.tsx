@@ -37,6 +37,7 @@ const handleLogin = async (data: LoginProps) => {
       token: response.token,
       role: response.role,
       email: response.email,
+      profileId: response.profileId,
       collegeId: response.collegeId,
       studentSummary: response.studentSummary
     }));
@@ -45,8 +46,16 @@ const handleLogin = async (data: LoginProps) => {
 
     // role-based navigation
     switch (response.role) {
-      case "ROLE_COLLEGE":
+      case "ROLE_PRINCIPAL":
         navigate("/college-dashboard/overview");
+        break;
+
+      case "ROLE_HOD":
+        navigate("/staff-dashboard/overview");
+        break;
+
+      case "ROLE_FACULTY":
+        navigate("/staff-dashboard/overview");
         break;
 
       case "ROLE_CLUB":
@@ -54,7 +63,7 @@ const handleLogin = async (data: LoginProps) => {
         break;
 
       case "ROLE_STUDENT":
-        navigate("/student-dashboard/home");
+        navigate("/");
         break;
 
       default:
@@ -62,7 +71,7 @@ const handleLogin = async (data: LoginProps) => {
     }
 
   } catch (err: any) {
-    toast.error(err.response?.data?.message || "Login failed");
+    toast.error(err.message);
   }
 };
 

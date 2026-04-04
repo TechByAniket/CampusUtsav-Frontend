@@ -105,3 +105,60 @@ export type Event = {
   registrationDeadline?: string; // ISO date string 
 };
 
+export interface EventSummary {
+  id: number;
+  title: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  eventCategory: string;
+  eventType: string;
+  venue: string;
+  remarks: string | null;
+  status: string;
+  posterUrl: string;
+  clubId: number;
+  clubNameShortForm: string;
+  clubLogoUrl: string;
+  clubName: string;
+}
+
+export interface AdminEventDetail {
+  id: number;
+  title: string;
+  eventCategory: string;
+  eventType: string;
+  fees: number;
+  description: string;
+  posterUrl: string;
+  venue: string;
+  date: string;
+  registrationDeadline: string;
+  startTime: string;
+  endTime: string;
+  teamEvent: boolean;
+  teamSize: number;
+  maxParticipants: number;
+  publicAttachments: Record<string, string>;
+  privateAttachments: Record<string, string>;
+  tags: string[] | null;
+  status: string;
+  registrationLink: string;
+  contactDetails: Record<string, { email: string; phone: string }>;
+  extraInfo: string | null;
+  club: {
+    id: number;
+    name: string;
+    shortForm: string;
+    adminName: string;
+    managedBy: string;
+    status: string;
+    logoUrl: string;
+  };
+  collegeId: number;
+  allowedBranches: Record<string, string>;
+  allowedYears: Record<string, string>;
+  active: boolean;
+  featured: boolean;
+}
+
