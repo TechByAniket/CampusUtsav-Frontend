@@ -13,7 +13,7 @@ export const accountMenuItems: AccountMenuItem[] = [
     label: "Profile",
     icon: User,
     action: "navigate",
-    path: "/user/profile",
+    path: "/users/profile",
   },
   {
     label: "Settings",

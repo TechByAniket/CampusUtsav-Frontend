@@ -23,6 +23,20 @@ export const registerStudent = async (data: any) => {
   }
 }
 
+// *********** GET Student's profile details *********** //
+export const getMyStudentProfileDetails = async () => {
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/students/me`, {
+      headers:{
+        Authorization : `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Failed to fetch student profile"));
+  }
+}
+
 export const students: Student[] = [
   {
     srNo: 1,
