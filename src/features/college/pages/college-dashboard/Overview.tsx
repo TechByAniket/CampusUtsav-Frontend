@@ -99,14 +99,14 @@ export const Overview: React.FC = () => {
                 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 lg:gap-4
             "
             >
-            {sampleEvents.map((event) => (
+            {/* {sampleEvents.map((event) => (
                 <div
                 key={event.id}
                 className="bg-white h-full col-span-1 rounded-[8px]"
                 >
                 <UpcomingEventCard {...event} />
                 </div>
-            ))}
+            ))} */}
             </div>
 
             <div className=" 

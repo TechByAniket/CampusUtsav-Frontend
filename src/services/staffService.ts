@@ -78,3 +78,16 @@ export const updateStaffClubAssignment = async (id: number | string, clubId: num
   }
 };
 
+// ********* GET STAFF PROFILE DETAILS ********** //
+export const getMyStaffProfileDetails = async () => {
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/staff/me`, {
+      headers:{
+        Authorization : `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Failed to fetch staff profile"));
+  }
+}

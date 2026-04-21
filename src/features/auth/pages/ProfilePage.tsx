@@ -15,10 +15,15 @@ import {
   Layers,
   Sparkles,
   Verified,
-  Mail
+  Mail,
+  Briefcase
 } from 'lucide-react';
+import { useSelector } from 'react-redux';
+
 import { getMyStudentProfileDetails } from '@/services/studentService';
+import { getMyStaffProfileDetails } from '@/services/staffService';
 import { toast } from 'sonner';
+import type { RootState } from '@/store/store';
 
 const YEAR_MAPPING: Record<string, string> = {
   "1": "FY",
@@ -28,23 +33,37 @@ const YEAR_MAPPING: Record<string, string> = {
 };
 
 const ProfilePage = () => {
-  const [studentData, setStudentData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { role } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const data = await getMyStudentProfileDetails();
-        setStudentData(data);
+        let data;
+        
+        // Define which roles use the staff service
+        const staffRoles = ['ROLE_FACULTY', 'ROLE_STAFF', 'ROLE_HOD'];
+        
+        if (role === 'ROLE_STUDENT') {
+          data = await getMyStudentProfileDetails();
+        } else if (staffRoles.includes(role || '')) {
+          data = await getMyStaffProfileDetails();
+        } else {
+          // Fallback or placeholder for other roles
+          data = null;
+        }
+        
+        setProfileData(data);
       } catch (err: any) {
-        toast.error(err.message);
+        toast.error(err.message || "Failed to sync identity");
       } finally {
         setLoading(false);
       }
     };
     fetchProfile();
-  }, []);
+  }, [role]);
 
   if (loading) {
     return (
@@ -55,9 +74,20 @@ const ProfilePage = () => {
     );
   }
 
-  if (!studentData) return null;
+  if (!profileData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No Profile Data Available</p>
+      </div>
+    );
+  }
 
-  const academicYear = YEAR_MAPPING[String(studentData.year)] || String(studentData.year);
+  // Determine if it's a student or staff for mapping
+  const isStudent = role === 'ROLE_STUDENT';
+  const staffRoles = ['ROLE_FACULTY', 'ROLE_STAFF', 'ROLE_HOD'];
+  const isStaff = staffRoles.includes(role || '');
+
+  const academicYear = isStudent ? (YEAR_MAPPING[String(profileData.year)] || String(profileData.year)) : null;
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 lg:p-10 font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
@@ -87,8 +117,8 @@ const ProfilePage = () => {
         >
           <div className="flex items-center gap-5">
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl font-extrabold border border-indigo-100">
-                {studentData.name.substring(0, 2).toUpperCase()}
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl font-extrabold border border-indigo-100 uppercase">
+                {profileData.name?.substring(0, 2)}
               </div>
               <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 rounded-lg border-2 border-white shadow-sm">
                 <Verified size={10} color="white" />
@@ -98,22 +128,22 @@ const ProfilePage = () => {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
-                  {studentData.name}
+                  {profileData.name}
                 </h1>
                 <div className="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md text-[8px] font-black uppercase tracking-widest">
-                  Active
+                  {profileData.status || "Active"}
                 </div>
               </div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                <AtSign size={10} className="text-indigo-400" /> {studentData.username}
+                <AtSign size={10} className="text-indigo-400" /> {isStudent ? profileData.username : profileData.email?.split('@')[0]}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-6 md:pr-4">
-             <HeroInfo label="UID" value={studentData.identificationNumber} />
-             <HeroInfo label="PHONE" value={studentData.phone} verified={studentData.phoneVerified} />
-             <HeroInfo label="ACC CREATED" value={new Date(studentData.createdAt).toLocaleDateString()} />
+             <HeroInfo label={isStudent ? "UID" : "EMP ID"} value={isStudent ? profileData.identificationNumber : profileData.employeeId} />
+             <HeroInfo label="PHONE" value={profileData.phone} verified={isStudent ? profileData.phoneVerified : true} />
+             <HeroInfo label="JOINED" value={new Date(profileData.createdAt).toLocaleDateString()} />
           </div>
         </motion.div>
 
@@ -124,75 +154,75 @@ const ProfilePage = () => {
             span="col-span-2"
             icon={<Building2 size={16} />}
             label="College"
-            value={studentData.collegeName}
+            value={isStudent ? profileData.collegeName : profileData.college?.name}
             color="indigo"
           />
 
           <Tile 
             icon={<BookOpen size={16} />}
             label="Branch"
-            value={studentData.branch}
+            value={isStudent ? profileData.branch : profileData.branchShortForm || profileData.branchName}
             color="blue"
           />
 
           <Tile 
              icon={<Hash size={16} />}
-             label="Roll No"
-             value={studentData.rollNo}
-             sub={`Division ${studentData.division}`}
+             label={isStudent ? "Roll No" : "Employee ID"}
+             value={isStudent ? profileData.rollNo : profileData.employeeId}
+             sub={isStudent ? `Division ${profileData.division}` : `ID: ${profileData.id}`}
              color="amber"
           />
 
           <Tile 
-            icon={<Layers size={16} />}
-            label="Year"
-            value={`${academicYear} Year`}
+            icon={isStudent ? <Layers size={16} /> : <Briefcase size={16} />}
+            label={isStudent ? "Year" : "Designation"}
+            value={isStudent ? `${academicYear} Year` : profileData.designation?.replace(/_/g, ' ')}
             color="violet"
           />
 
           <Tile 
             icon={<IdCard size={16} />}
-            label="College ID"
-            value={studentData.collegeId}
+            label={isStudent ? "College ID" : "Staff Profile ID"}
+            value={isStudent ? profileData.collegeId : `STF-${profileData.id}`}
             color="slate"
           />
 
           <Tile 
             span="col-span-2"
             icon={<Sparkles size={16} />}
-            label="Interests"
-            value={studentData.interests || "General Interests"}
+            label={isStudent ? "Interests" : (profileData.clubCoordinator ? "Club Management" : "Role Status")}
+            value={isStudent ? (profileData.interests || "General Interests") : (profileData.managedClubDetails?.name || (profileData.hod ? "Department Head" : "Faculty Member"))}
             color="emerald"
           />
           
           <Tile 
             icon={<Mail size={16} />}
-            label="Email Identity"
-            value={studentData.email}
-            verified={studentData.emailVerified}
+            label="Official Identity"
+            value={profileData.email}
+            verified={isStudent ? profileData.emailVerified : true}
             color="rose"
             span="col-span-2"
           />
           
           <Tile 
             icon={<Phone size={16} />}
-            label="Secondary Contact"
-            value={studentData.phone}
+            label="Direct Contact"
+            value={profileData.phone}
             color="cyan"
             span="col-span-2"
           />
 
           <Tile 
             icon={<Calendar size={16} />}
-            label="Admission"
-            value={studentData.admissionYear}
+            label={isStudent ? "Admission" : "Active Since"}
+            value={isStudent ? profileData.admissionYear : new Date(profileData.createdAt).getFullYear()}
             color="orange"
           />
 
           <Tile 
             icon={<Award size={16} />}
-            label="Graduation"
-            value={studentData.graduationYear}
+            label={isStudent ? "Graduation" : "System Role"}
+            value={isStudent ? profileData.graduationYear : profileData.userRole?.replace('ROLE_', '')}
             color="teal"
           />
         </div>
@@ -216,7 +246,7 @@ const HeroInfo = ({ label, value, verified = true }: any) => (
        <div className={`w-1 h-1 rounded-full ${verified ? 'bg-emerald-500' : 'bg-slate-300'}`} />
        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
     </div>
-    <p className="text-xs font-black text-slate-800 tracking-tight leading-none">{value}</p>
+    <p className="text-xs font-black text-slate-800 tracking-tight leading-none">{value || "---"}</p>
   </div>
 );
 
@@ -241,3 +271,4 @@ const Tile = ({ icon, label, value, sub, color, span, verified }: any) => (
 );
 
 export default ProfilePage;
+;
