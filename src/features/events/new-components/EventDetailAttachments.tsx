@@ -20,11 +20,11 @@ export const EventDetailAttachments = ({
   const total = publicList.length + privateList.length;
 
   const content = (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
          <div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1.5 uppercase">Event Resources</h3>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Intelligence Feed</p>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1.5">Event Resources</h3>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Event Resources</p>
          </div>
          <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 font-black text-sm shadow-md">
             {total}
@@ -60,14 +60,14 @@ export const EventDetailAttachments = ({
 
   if (isBento) {
     return (
-      <div className="p-7 bg-[#f8fafc]/50 rounded-3xl border border-slate-200 shadow-md h-full">
+      <div className="p-5 bg-[#f8fafc]/50 rounded-3xl border border-slate-200 shadow-md h-full">
         {content}
       </div>
     );
   }
 
   return (
-    <div className="p-7 bg-white rounded-3xl border border-slate-200 shadow-md">
+    <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-md">
       {content}
     </div>
   );

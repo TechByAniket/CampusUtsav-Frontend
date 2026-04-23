@@ -53,7 +53,7 @@ export const AdminEventDetailsPage = () => {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-6 bg-white font-sans">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-xl shadow-indigo-100" />
-        <p className="text-slate-400 font-black text-[11px] uppercase tracking-[0.4em]">Propagating intelligence...</p>
+        <p className="text-slate-400 font-black text-[11px] uppercase tracking-[0.4em]">Loading event...</p>
       </div>
     )
   }
@@ -66,7 +66,7 @@ export const AdminEventDetailsPage = () => {
         </div>
         <div className="space-y-2">
            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Record Not Found</h2>
-           <p className="text-slate-400 font-medium max-w-sm mx-auto text-sm leading-relaxed uppercase tracking-[0.1em]">Intelligence database returned null.</p>
+           <p className="text-slate-400 font-medium max-w-sm mx-auto text-sm leading-relaxed uppercase tracking-[0.1em]">Event record not found.</p>
         </div>
         <Button onClick={() => navigate(-1)} variant="outline" className="rounded-2xl px-12 h-14 font-black uppercase text-xs tracking-widest border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
            Go Back to Console
@@ -135,21 +135,21 @@ export const AdminEventDetailsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pt-2">
            
            {/* Detailed Information (Left Column) */}
-           <div className="lg:col-span-8 space-y-10">
+           <div className="lg:col-span-8 space-y-6">
               {/* Mission Briefing / Description */}
               <motion.div 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden"
               >
-                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/10">
+                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/10">
                     <div className="flex items-center gap-4">
                        <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-lg shadow-indigo-100" />
-                       <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Mission Overview</h3>
+                       <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none">Event Description</h3>
                     </div>
                     <LayoutDashboard size={22} className="text-slate-400" />
                  </div>
-                 <div className="p-8 lg:p-11">
+                 <div className="p-6 lg:p-8">
                     <p className="text-slate-600 font-medium leading-[1.85] whitespace-pre-line text-lg tracking-tight">
                       {event.description}
                     </p>
@@ -164,7 +164,7 @@ export const AdminEventDetailsPage = () => {
            </div>
 
            {/* Sidebar: Logistics & Authority (Right Column) */}
-           <div className="lg:col-span-4 space-y-10">
+           <div className="lg:col-span-4 space-y-6">
               {/* Eligibility Matrix */}
               <EventDetailCriteria 
                 allowedBranches={event.allowedBranches}
@@ -187,9 +187,9 @@ export const AdminEventDetailsPage = () => {
               <Info size={24} />
            </div>
            <div className="text-center space-y-2">
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">CampusUtsav Intelligence Console</p>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">CampusUtsav Admin Console</p>
               <div className="flex items-center justify-center gap-3">
-                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">© 2026 Institutional Framework</span>
+                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">© 2026 Institutional Platform</span>
                  <span className="w-2 h-2 bg-slate-100 rounded-full" />
                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">v5.2.0 Active Alpha</span>
               </div>

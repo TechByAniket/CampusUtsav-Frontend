@@ -19,16 +19,16 @@ export const EventDetailCriteria = ({
   const years = Object.values(allowedYears || {});
 
   const Section = ({ title, items, icon: Icon, color = "indigo" }: { title: string, items: string[], icon: any, color?: string }) => (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-md space-y-4 h-full relative group transition-all hover:border-slate-300">
-      <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
+    <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-md space-y-3 h-full relative group transition-all hover:border-slate-300">
+      <div className="flex items-center gap-3 border-b border-slate-50 pb-3">
         <div className={`w-10 h-10 rounded-xl bg-${color}-50 flex items-center justify-center text-${color}-600 shadow-sm border border-${color}-100/50`}>
           <Icon size={20} />
         </div>
         <div>
-           <h3 className="text-md font-black text-slate-900 tracking-tight leading-none mb-1.5 uppercase">{title}</h3>
+           <h3 className="text-md font-black text-slate-900 tracking-tight leading-none mb-1.5">{title}</h3>
            <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-emerald-500 rounded-full shadow-sm shadow-emerald-100" />
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Qualified Feed</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Eligible Candidates</p>
            </div>
         </div>
       </div>
@@ -40,7 +40,7 @@ export const EventDetailCriteria = ({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl group/item hover:bg-white transition-all hover:shadow-sm"
+            className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-100 rounded-xl group/item hover:bg-white transition-all hover:shadow-sm"
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center bg-white border border-slate-200 text-${color}-600 group-hover/item:border-${color}-300 shadow-sm transition-colors`}>
                <CheckCircle2 size={12} />
@@ -50,7 +50,7 @@ export const EventDetailCriteria = ({
         )) : (
           <div className="flex items-center gap-3 p-5 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs uppercase tracking-widest justify-center">
             <AlertCircle size={16} />
-            Universal Base
+            No restrictions
           </div>
         )}
       </div>

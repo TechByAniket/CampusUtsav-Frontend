@@ -54,9 +54,9 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="explore-events" element={<ExploreEventsPage />} />
         <Route path="explore-events/events/:id" element={<PublicEventDetailsPage />} />
-        <Route path="/users/profile" element={<ProfilePage />} />
+        <Route path="users/profile" element={<ProfilePage />} />
         {/* Public 404 / Access Denied */}
-        <Route path="/access-denied" element={<AccessDenied />} />
+        <Route path="access-denied" element={<AccessDenied />} />
         {/* The asterisk '*' matches anything not defined above */}
         <Route path="*" element={<NotFound />} />
       </Route>

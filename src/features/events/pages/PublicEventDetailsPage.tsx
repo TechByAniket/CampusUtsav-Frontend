@@ -52,7 +52,7 @@ export const PublicEventDetailsPage = () => {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-6 bg-white font-sans">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-xl shadow-indigo-100" />
-        <p className="text-slate-400 font-black text-[11px] uppercase tracking-[0.4em]">Loading event details...</p>
+        <p className="text-slate-400 font-black text-[11px] uppercase tracking-[0.4em]">Loading...</p>
       </div>
     )
   }
@@ -111,7 +111,7 @@ export const PublicEventDetailsPage = () => {
 
   return (
     <section className="w-full min-h-screen bg-white py-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
-      <div className="max-w-6xl mx-auto space-y-12">
+      <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Navigation Phase */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-1 border-b border-slate-100/80">
@@ -147,6 +147,7 @@ export const PublicEventDetailsPage = () => {
                 deadline={event.registrationDeadline}
                 eventId={event.id}
                 teamSize={event.teamSize}
+                isTeamEvent={event.teamEvent}
                 isEligible={eligible}
                 ineligibilityReason={reason}
                 allowedBranches={event.allowedBranches}
@@ -159,21 +160,21 @@ export const PublicEventDetailsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pt-2">
            
            {/* Detailed Information (Left Column) */}
-           <div className="lg:col-span-8 space-y-10">
+           <div className="lg:col-span-8 space-y-6">
               {/* Mission Briefing / Description */}
               <motion.div 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden"
               >
-                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/10">
+                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/10">
                     <div className="flex items-center gap-4">
                        <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-lg shadow-indigo-100" />
-                       <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Mission Overview</h3>
+                       <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none">Event Description</h3>
                     </div>
                     <LayoutDashboard size={22} className="text-slate-400" />
                  </div>
-                 <div className="p-8 lg:p-11">
+                 <div className="p-6 lg:p-8">
                     <p className="text-slate-600 font-medium leading-[1.85] whitespace-pre-line text-lg tracking-tight">
                        {event.description}
                     </p>
@@ -188,7 +189,7 @@ export const PublicEventDetailsPage = () => {
            </div>
 
            {/* Sidebar: Logistics & Authority (Right Column) */}
-           <div className="lg:col-span-4 space-y-10">
+           <div className="lg:col-span-4 space-y-6">
               {/* Eligibility Matrix */}
               <EventDetailCriteria 
                 allowedBranches={event.allowedBranches}
@@ -211,11 +212,11 @@ export const PublicEventDetailsPage = () => {
               <Info size={24} />
            </div>
            <div className="text-center space-y-2">
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">Campus Utsav Event Management Portal</p>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">Campus Utsav Event Platform</p>
               <div className="flex items-center justify-center gap-3">
                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">© 2026 Campus Utsav Team</span>
                  <span className="w-2 h-2 bg-slate-100 rounded-full" />
-                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Official Institutional Platform</span>
+                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Official Event Platform</span>
               </div>
            </div>
         </div>

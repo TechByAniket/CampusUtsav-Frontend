@@ -31,6 +31,24 @@ export const getAllOfficialDomainsOfCollege = async (collegeId: number | string)
   }
 }
 
+// ********* GET COLLEGE PROFILE DETAILS ********** //
+export const getMyCollegeProfileDetails = async () => {
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/college/me`, {
+      headers:{
+        Authorization : `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Failed to fetch college profile"));
+  }
+}
+
+
+
+
+
 export const sampleColleges: College[] = [
   {
     id: 101,

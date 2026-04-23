@@ -2,16 +2,17 @@ import axios from "axios";
 import { handleServiceError } from "@/utils/errorUtils";
 
 export type Student = {
-  srNo: number
-  regId: string
+  id: number
   name: string
-  collegeUid: string
-  year: string
-  branch: string
-  division: string
-  rollNo: string
+  gender: string
+  identificationNumber: string
   email: string
   phone: string
+  rollNo: number
+  year: number
+  division: string
+  branch: string
+  collegeId: number
 }
 
 export const registerStudent = async (data: any) => {
@@ -36,6 +37,22 @@ export const getMyStudentProfileDetails = async () => {
     throw new Error(handleServiceError(error, "Failed to fetch student profile"));
   }
 }
+
+// *********** GET Student's profile details *********** //
+export const getAllStudentsByCollege = async (collegeId) => {
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/colleges/${collegeId}/students`, {
+      headers:{
+        Authorization : `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Failed to fetch students"));
+  }
+}
+
+
 
 export const students: Student[] = [
   {

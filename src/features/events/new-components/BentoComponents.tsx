@@ -54,12 +54,13 @@ interface HeroStat {
 
 export const BentoHeroDetail = ({ 
   title, status, category, venue, 
-  stats, date, deadline, eventId, teamSize = 1,
+  stats, date, deadline, eventId, teamSize = 1, isTeamEvent = false,
   isEligible = true, ineligibilityReason = "",
   allowedBranches = {}, allowedYears = {}
 }: { 
   title: string, status: string, category: string, venue: string,
   stats: HeroStat[], date: string, deadline: string, eventId: number, teamSize?: number,
+  isTeamEvent?: boolean,
   isEligible?: boolean, ineligibilityReason?: string,
   allowedBranches?: Record<string, string>, allowedYears?: Record<string, string>
 }) => {
@@ -217,6 +218,7 @@ export const BentoHeroDetail = ({
                   eventId={eventId}
                   eventTitle={title}
                   teamSize={teamSize}
+                  isTeamEvent={isTeamEvent}
                   onClose={() => setIsModalOpen(false)}
                   allowedBranches={allowedBranches}
                   allowedYears={allowedYears}

@@ -122,18 +122,18 @@ export const StaffDashboardLayout = () => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30.2 }}
         className={`
-          fixed inset-y-0 left-0 z-50 lg:relative
-          flex flex-col bg-white border-r border-slate-200/60 shadow-sm
+          fixed inset-y-0 left-0 z-50
+          flex flex-col bg-slate-900 border-r border-slate-800 shadow-2xl
           ${isMobileMenuOpen ? "flex" : "hidden lg:flex"}
         `}
       >
         {/* Logo Section */}
-        <div className="h-20 flex items-center justify-between px-6 border-b border-slate-100">
+        <div className="h-20 flex items-center justify-between px-6 border-b border-slate-800">
           {!isCollapsed && (
             <motion.h1 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-xl font-bold tracking-tight text-slate-900"
+              className="text-xl font-bold tracking-tight text-white"
             >
               <span className="text-orange-500">Campus</span>Utsav
             </motion.h1>
@@ -148,7 +148,7 @@ export const StaffDashboardLayout = () => {
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-xl"
+            className="hidden lg:flex hover:bg-slate-800 text-slate-500 hover:text-white rounded-xl"
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </Button>
@@ -157,7 +157,7 @@ export const StaffDashboardLayout = () => {
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden hover:bg-slate-50 text-slate-400 rounded-xl"
+            className="lg:hidden hover:bg-slate-800 text-slate-400 rounded-xl"
           >
             <X size={18} />
           </Button>
@@ -178,14 +178,14 @@ export const StaffDashboardLayout = () => {
                   transition-all duration-200 outline-none
                   ${
                     isActive
-                      ? "bg-orange-50 text-orange-600 font-semibold"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                      ? "bg-white/10 text-white font-semibold"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
                   }
                 `}
               >
                 <Icon
                   className={`shrink-0 w-5 h-5 transition-colors ${
-                    isActive ? "text-orange-600" : "text-slate-400 group-hover:text-slate-600"
+                    isActive ? "text-orange-500" : "text-slate-500 group-hover:text-slate-300"
                   }`}
                 />
                 
@@ -223,18 +223,18 @@ export const StaffDashboardLayout = () => {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-slate-800">
             {!isCollapsed ? (
-                <div className="bg-slate-50 rounded-2xl p-4">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Staff Access</p>
-                    <p className="text-xs text-slate-600 mb-3">Manage club activities and event moderation.</p>
-                    <Button variant="outline" className="w-full text-xs h-8 rounded-lg bg-white border-slate-200 text-slate-600 hover:bg-slate-50">
+                <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-800">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Staff Access</p>
+                    <p className="text-xs text-slate-400 mb-3">Manage club activities and event moderation.</p>
+                    <Button variant="outline" className="w-full text-xs h-8 rounded-lg bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
                         Help Center
                     </Button>
                 </div>
             ) : (
                 <div className="flex justify-center">
-                    <Button variant="ghost" size="icon" className="text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-xl">
+                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-orange-500 hover:bg-white/5 rounded-xl">
                         <Mail size={18} />
                     </Button>
                 </div>
@@ -243,7 +243,9 @@ export const StaffDashboardLayout = () => {
       </motion.aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div 
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isCollapsed ? "lg:pl-20" : "lg:pl-[280px]"}`}
+      >
         {/* Top Navbar */}
         <header className="sticky top-0 z-30 h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4">

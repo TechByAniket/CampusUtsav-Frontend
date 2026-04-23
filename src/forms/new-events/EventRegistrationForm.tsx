@@ -37,11 +37,12 @@ export const EventRegistrationForm: React.FC<{
   onClose: () => void;
   eventTitle?: string;
   teamSize?: number;
+  isTeamEvent?: boolean;
   eventId: number;
   allowedBranches?: Record<string, string>;
   allowedYears?: Record<string, string>;
 }> = ({ 
-  onClose, teamSize = 1, eventTitle, eventId,
+  onClose, teamSize = 1, isTeamEvent = false, eventTitle, eventId,
   allowedBranches = {}, allowedYears = {}
 }) => {
    const student = useSelector((state: RootState) => state.auth.studentSummary);
@@ -117,7 +118,7 @@ export const EventRegistrationForm: React.FC<{
   /* ================= SUBMIT ================= */
 
   const handleSubmit = async () => {
-    const isTeam = teamSize > 1;
+    const isTeam = isTeamEvent && teamSize > 1;
     
     // Final validation for team formation
     if (isTeam) {
@@ -199,12 +200,14 @@ export const EventRegistrationForm: React.FC<{
           <div className="flex items-center gap-2 mb-1">
              <div className="w-1 h-4 bg-indigo-600 rounded-full" />
              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Primary Candidate Information</h3>
-             <div className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${teamSize > 1 ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
-             <Users size={12} />
-             <span className="text-[10px] font-black uppercase tracking-widest leading-none">
-               {teamSize > 1 ? `Team` : "Solo"}
-             </span>
-          </div>
+             {isTeamEvent && teamSize > 1 && (
+               <div className="px-3 py-1.5 rounded-full border flex items-center gap-2 bg-amber-50/50 border-amber-500/20 text-amber-600">
+                 <Users size={12} />
+                 <span className="text-[10px] font-black uppercase tracking-widest leading-none">
+                   Team Formation
+                 </span>
+               </div>
+             )}
           </div>
           
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
@@ -217,7 +220,7 @@ export const EventRegistrationForm: React.FC<{
         </section>
 
         {/* ===== TEAM ARCHITECTURE ===== */}
-        {teamSize > 1 && (
+        {isTeamEvent && teamSize > 1 && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center gap-2 mb-1">
                <div className="w-1 h-4 bg-amber-500 rounded-full" />

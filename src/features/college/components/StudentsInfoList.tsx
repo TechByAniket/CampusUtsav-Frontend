@@ -1,188 +1,330 @@
-import React, { useState, useEffect } from 'react';
-import type { Student } from '@/services/studentService'
-import { Phone, Mail, Search, Filter, X, CreditCard, GraduationCap, Hash } from 'lucide-react'
-// import { De } from 'zod/v4/locales';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
+import type { Student } from '@/services/studentService';
+import { getAllBranchesOfCollege } from '@/services/collegeService';
+import { 
+  Phone, Mail, Search, X, 
+  GraduationCap, Info, UserCircle, Users, Hash, ChevronDown, Check
+} from 'lucide-react';
 
 type StudentsInfoListProps = {
-  students: Student[]
-}
+  students: Student[];
+};
+
+// Custom MultiSelect Dropdown Component
+const MultiSelect = ({ 
+  label, 
+  options, 
+  selected, 
+  onToggle, 
+  onClear,
+  icon: Icon 
+}: { 
+  label: string; 
+  options: string[]; 
+  selected: string[]; 
+  onToggle: (val: string) => void;
+  onClear: () => void;
+  icon?: any;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2 text-[11px] font-black text-indigo-700 outline-none transition-all hover:bg-indigo-100 min-w-[140px] justify-between shadow-sm"
+      >
+        <div className="flex items-center gap-2">
+            {Icon && <Icon size={12} className="text-indigo-400" />}
+            <span className="uppercase tracking-widest whitespace-nowrap">
+            {selected.length === 0 ? `ALL ${label}S` : `${selected.length} ${label}${selected.length > 1 ? 'S' : ''}`}
+            </span>
+        </div>
+        <ChevronDown size={12} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+             <div className="max-h-60 overflow-y-auto no-scrollbar py-1">
+                {options.map(opt => (
+                  <label key={opt} className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors group">
+                    <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center shrink-0 ${selected.includes(opt) ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 group-hover:border-indigo-400'}`}>
+                      {selected.includes(opt) && <Check size={10} className="text-white stroke-[4]" />}
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      className="hidden" 
+                      checked={selected.includes(opt)}
+                      onChange={() => onToggle(opt)}
+                    />
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight truncate">{opt}</span>
+                  </label>
+                ))}
+             </div>
+             {selected.length > 0 && (
+               <button 
+                 onClick={(e) => { e.stopPropagation(); onClear(); }}
+                 className="w-full mt-1 pt-2 border-t border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors py-2"
+               >
+                 Clear Selections
+               </button>
+             )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 export const StudentsInfoList = ({ students }: StudentsInfoListProps) => {
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [branches, setBranches] = useState<string[]>([]);
+  
+  const collegeId = useSelector((state: RootState) => state.auth.collegeId);
+  const years = ['FY', 'SY', 'TY', 'FINAL'];
 
-  // PREVENT BACKGROUND SCROLLING
   useEffect(() => {
-    if (selectedStudent) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [selectedStudent]);
+    const fetchBranches = async () => {
+      if (!collegeId) return;
+      try {
+        const data = await getAllBranchesOfCollege(collegeId);
+        if (typeof data === 'object' && !Array.isArray(data)) {
+            setBranches(Object.values(data));
+        } else {
+            setBranches(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch branches", error);
+      }
+    };
+    fetchBranches();
+  }, [collegeId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onClose(); 
+  const getYearLabel = (year: number) => {
+    if (year === 1) return 'FY';
+    if (year === 2) return 'SY';
+    if (year === 3) return 'TY';
+    if (year === 4) return 'FINAL';
+    return year.toString();
+  };
+
+  const filteredData = useMemo(() => {
+    return students.filter(s => {
+      const studentYearLabel = getYearLabel(s.year);
+      const matchesYear = selectedYears.length === 0 || selectedYears.includes(studentYearLabel);
+      const matchesBranch = selectedBranches.length === 0 || selectedBranches.includes(s.branch);
+      const matchesSearch = 
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        s.identificationNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesYear && matchesBranch && matchesSearch;
+    });
+  }, [students, selectedYears, selectedBranches, searchQuery]);
+
+  const toggleYear = (year: string) => {
+    setSelectedYears(prev => prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year]);
+  };
+
+  const toggleBranch = (branch: string) => {
+    setSelectedBranches(prev => prev.includes(branch) ? prev.filter(b => b !== branch) : [...prev, branch]);
   };
 
   return (
-    <section className="w-full min-h-screen bg-[#F8FAFC] py-6 px-4 md:px-8">
-      <div className="max-w-[1600px] mx-auto">
-
+    <div className="w-full font-sans">
+        
         {/* --- HEADER --- */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-none">
-              Student Directory 
-              <span className="text-indigo-600 font-medium ml-2 text-lg">({students.length})</span>
+          <div className="min-w-[300px]">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900 uppercase tracking-tight">
+              Student Directory <span className="text-indigo-600 ml-2 text-lg tabular-nums">({filteredData.length})</span>
             </h2>
-            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">
-              CampusUtsav Administration
-            </p>
+            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">CampusUtsav Administration</p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="relative hidden md:block">
+          
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-none">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                type="text"
-                placeholder="Search students..."
-                className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none w-64 font-medium"
+              <input 
+                  type="text" 
+                  placeholder="Search students..." 
+                  className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none w-full md:w-72 font-medium transition-all focus:border-indigo-300" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)} 
               />
             </div>
-            <button className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all">
-              <Filter size={12} /> Filter
-            </button>
           </div>
         </div>
 
-        {/* --- MOBILE VIEW --- */}
-        <div className="md:hidden space-y-2">
-          {students.map((s) => (
-            <div 
-              key={s.regId} 
-              onClick={() => setSelectedStudent(s)} 
-              className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm active:bg-slate-50 transition-colors cursor-pointer"
+        {/* --- FILTERS ROW --- */}
+        <div className="flex flex-wrap items-center gap-3 mb-6 bg-white/50 p-2 rounded-2xl border border-slate-100">
+          <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Filters:</div>
+          <MultiSelect 
+            label="YEAR" 
+            options={years} 
+            selected={selectedYears} 
+            onToggle={toggleYear} 
+            onClear={() => setSelectedYears([])}
+            icon={GraduationCap}
+          />
+          <MultiSelect 
+            label="BRANCH" 
+            options={branches} 
+            selected={selectedBranches} 
+            onToggle={toggleBranch} 
+            onClear={() => setSelectedBranches([])}
+            icon={Users}
+          />
+          {(selectedYears.length > 0 || selectedBranches.length > 0) && (
+            <button 
+              onClick={() => { setSelectedYears([]); setSelectedBranches([]); }}
+              className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700 px-2 transition-colors"
             >
-              <div className="flex-1">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">{s.name}</h3>
-                {/* <p className="text-[11px] font-bold text-indigo-600 mt-1 uppercase">
-                  {s.year}-{s.branch}-{s.division}-{s.rollNo}
-                </p> */}
-                <div className='flex gap-4'>
-                  <p className="text-[13px] font-bold text-primary">{s.collegeUid}</p>
-                  <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full">
-                    {s.year}-{s.branch}-{s.division}-{s.rollNo}
-                  </span>
-                </div>
-              </div>
-              <span className="text-[10px] font-bold text-slate-300">#{s.srNo}</span>
-            </div>
-          ))}
+              Reset Filters
+            </button>
+          )}
         </div>
 
-        {/* --- DESKTOP VIEW --- */}
-        {/* --- DESKTOP VIEW: REFRESHED THEME --- */}
-<div className="hidden md:block bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50">
-  <div className="overflow-x-auto">
-    <table className="w-full border-collapse">
-      <thead>
-        {/* Updated Header: Darker gradient for high contrast and depth */}
-        <tr className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
-          <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center w-20">Sr.</th>
-          <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Full Name</th>
-          <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">College UID</th>
-          <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Year-Branch-Div-Roll</th>
-          <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Contact Information</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-100">
-        {students.map((s, index) => (
-          <tr 
-            key={s.regId} 
-            // Alternating row colors to make it look active and readable
-            className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-indigo-50/40 transition-colors group`}
-          >
-            <td className="px-8 py-4 text-center text-[11px] font-bold text-slate-300">#{s.srNo}</td>
-            <td className="px-8 py-4 uppercase text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
-              {s.name}
-            </td>
-            <td className="px-8 py-4 font-mono text-sm font-bold text-primary">
-              <span className="bg-slate-100 px-2 py-1 rounded-lg border border-slate-200/50">{s.collegeUid}</span>
-            </td>
-            <td className="px-8 py-4">
-              <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-4 py-1.5 rounded-full shadow-sm">
-                {s.year}-{s.branch}-{s.division}-{s.rollNo}
-              </span>
-            </td>
-            <td className="px-8 py-4">
-              <div className="flex items-center gap-8 text-sm font-bold">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Phone size={14} className="text-indigo-400" /> {s.phone}
+        {/* --- CONTENT AREA --- */}
+        <div className="min-height-[400px]">
+            {filteredData.length === 0 ? (
+            <div className="bg-white rounded-[2rem] border border-slate-200 p-20 text-center shadow-sm">
+                <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300">
+                    <Users size={32} />
                 </div>
-                <div className="flex items-center gap-2 text-slate-400 font-medium">
-                  <Mail size={14} className="text-indigo-300 items-center" /> {s.email}
+                <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No matching records found</p>
+            </div>
+            ) : (
+            <>
+                {/* --- MOBILE VIEW --- */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                {filteredData.map((s) => (
+                    <div key={s.id} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm" onClick={() => setSelectedStudent(s)}>
+                    <div className="flex justify-between items-start mb-3">
+                        <div>
+                        <h3 className="font-bold text-slate-800 uppercase text-sm leading-tight">{s.name}</h3>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{s.identificationNumber}</p>
+                        </div>
+                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg uppercase">{getYearLabel(s.year)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-tight">
+                        <GraduationCap size={12} className="text-indigo-500" /> {s.branch} • Div {s.division} • Roll {s.rollNo}
+                    </div>
+                    </div>
+                ))}
                 </div>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-      </div>
 
-      {/* --- CENTERED MOBILE MODAL --- */}
+                {/* --- DESKTOP VIEW --- */}
+                <div className="hidden md:block bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50">
+                <table className="w-full border-collapse table-fixed">
+                    <thead>
+                    <tr className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 text-left">
+                        <th className="w-[30%] px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Student Identity</th>
+                        <th className="w-[25%] px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Academic Info</th>
+                        <th className="w-[30%] px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Contact Details</th>
+                        <th className="w-[15%] px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                    {filteredData.map((s) => (
+                        <tr key={s.id} className="hover:bg-indigo-50/40 transition-colors group">
+                        <td className="px-6 py-4">
+                            <div className="font-bold text-slate-800 uppercase text-sm truncate">{s.name}</div>
+                            <div className="text-[12px] text-slate-400 font-mono font-bold leading-none mt-1">ID: {s.identificationNumber}</div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                            <div className="text-[11px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-3 py-1 rounded-full w-fit whitespace-nowrap">
+                                {getYearLabel(s.year)} • {s.branch}
+                            </div>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1 mt-1">
+                                Div {s.division} • Roll {s.rollNo}
+                            </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                            <div className="flex items-center gap-2 text-[12px] font-bold text-slate-700 truncate">
+                                <Phone size={12} className="text-indigo-400 shrink-0" /> {s.phone}
+                            </div>
+                            <div className="flex items-center gap-2 text-[12px] font-medium text-slate-400 mt-1 truncate">
+                                <Mail size={12} className="text-slate-300 shrink-0" /> {s.email}
+                            </div>
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                            <button 
+                                onClick={() => setSelectedStudent(s)}
+                                className="px-4 py-2.5 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:shadow-lg transition-all active:scale-95"
+                            >
+                                Details
+                            </button>
+                        </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+                </div>
+            </>
+            )}
+        </div>
+
+      {/* --- STUDENT PROFILE MODAL --- */}
       {selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-white rounded-[2rem] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-5">
-              <div className="flex-1">
-                <h2 className="text-2xl font-black text-slate-900 leading-tight uppercase">{selectedStudent.name}</h2>
-                <p className="text-indigo-600 font-bold text-[9px] uppercase tracking-widest mt-1">Student Details</p>
-                <h4 className="text-xl font-black text-primary leading-tight uppercase">{selectedStudent.collegeUid}</h4>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+          <div className="w-full max-w-xl bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-y-auto max-h-[90vh] no-scrollbar">
+            <button onClick={() => setSelectedStudent(null)} className="absolute top-8 right-8 p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors">
+              <X size={20} />
+            </button>
+
+            <div className="text-center mb-10">
+              <div className="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-5 border border-indigo-100 shadow-inner">
+                <UserCircle size={56} />
               </div>
-              <button onClick={() => setSelectedStudent(null)} className="p-1.5 bg-slate-50 rounded-full text-slate-400">
-                <X size={18} />
-              </button>
+              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight leading-none">{selectedStudent.name}</h2>
+              <div className="flex items-center justify-center gap-2 mt-3">
+                 <span className="text-indigo-600 font-bold text-[11px] uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">{selectedStudent.identificationNumber}</span>
+              </div>
             </div>
 
-            <div className="space-y-2.5">
-              {/* <DetailCapsule icon={<CreditCard />} label="College UID" value={selectedStudent.collegeUid} color="slate" /> */}
-              <DetailCapsule icon={<GraduationCap />} label="Academic Info" value={`${selectedStudent.year}-${selectedStudent.branch}-${selectedStudent.division}-${selectedStudent.rollNo}`} color="indigo" />
-              {/* <DetailCapsule icon={<Hash />} label="Roll Number" value={selectedStudent.rollNo} color="slate" /> */}
-              <DetailCapsule icon={<Phone />} label="Phone" value={selectedStudent.phone} color="indigo" />
-              <DetailCapsule icon={<Mail />} label="Email" value={selectedStudent.email} color="slate" />
-              
-              <div className="grid grid-cols-2 gap-2 pt-3">
-                <a href={`tel:${selectedStudent.phone}`} className="flex items-center justify-center py-3 bg-orange-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest gap-2">
-                  <Phone size={16} /> Call
-                </a>
-                <a href={`mailto:${selectedStudent.email}`} className="flex items-center justify-center py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest gap-2">
-                  <Mail size={16} /> Email
-                </a>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+               <InfoTile icon={<Info size={16}/>} label="Internal ID" value={selectedStudent.id.toString()} />
+               <InfoTile icon={<GraduationCap size={16}/>} label="Academic Year" value={getYearLabel(selectedStudent.year)} />
+               <InfoTile icon={<Users size={16}/>} label="Branch & Division" value={`${selectedStudent.branch} - ${selectedStudent.division}`} />
+               <InfoTile icon={<Hash size={16}/>} label="Roll Number" value={selectedStudent.rollNo.toString()} />
+               <InfoTile icon={<Phone size={16}/>} label="Phone Number" value={selectedStudent.phone} />
+               <InfoTile icon={<Mail size={16}/>} label="Email Address" value={selectedStudent.email} />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <a href={`tel:${selectedStudent.phone}`} className="flex items-center justify-center py-4 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"><Phone size={16} /> Call</a>
+              <button 
+                 onClick={() => setSelectedStudent(null)}
+                 className="flex items-center justify-center py-4 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-100"
+              >
+                  Close
+              </button>
             </div>
           </div>
         </div>
       )}
-    </section>
-  )
-}
-
-// COMPACT DETAIL CAPSULE
-const DetailCapsule = ({ icon, label, value, color }: any) => {
-  const isIndigo = color === 'indigo';
-  return (
-    <div className={`flex items-center gap-3 p-2.5 rounded-2xl border ${isIndigo ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-slate-100'}`}>
-      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isIndigo ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400 shadow-sm'}`}>
-        {React.cloneElement(icon, { size: 14 })}
-      </div>
-      <div className="min-w-0">
-        {/* <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{label}</p> */}
-        <p className={`text-xs font-bold truncate ${isIndigo ? 'text-indigo-700' : 'text-slate-800'}`}>{value}</p>
-      </div>
     </div>
-  )
-}
+  );
+};
+
+const InfoTile = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+  <div className="p-4 rounded-3xl border flex items-start gap-4 bg-slate-50 border-slate-100/80 transition-hover hover:border-indigo-100">
+    <div className="mt-1 text-indigo-500 bg-white p-2 rounded-xl shadow-sm border border-slate-100">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">{label}</p>
+      <p className="text-[14px] font-bold truncate leading-tight text-slate-800 uppercase">{value}</p>
+    </div>
+  </div>
+);
+

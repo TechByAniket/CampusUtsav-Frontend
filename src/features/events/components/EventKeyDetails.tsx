@@ -190,6 +190,7 @@ export const EventKeyDetails: React.FC<EventKeyDetailsProps> = ({
                   // eventData={props} 
                   onClose={() => setIsModalOpen(false)} 
                   teamSize={teamSize}
+                  isTeamEvent={teamEvent}
                   eventTitle={title}
                   eventId={id}
                />
