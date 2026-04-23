@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
 import type { Student } from '@/services/studentService';
 import { getAllBranchesOfCollege } from '@/services/collegeService';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Phone, Mail, Search, X, 
   GraduationCap, Info, UserCircle, Users, Hash, ChevronDown, Check
@@ -12,7 +13,8 @@ type StudentsInfoListProps = {
   students: Student[];
 };
 
-// Custom MultiSelect Dropdown Component
+// --- HELPER COMPONENTS ---
+
 const MultiSelect = ({ 
   label, 
   options, 
@@ -79,6 +81,96 @@ const MultiSelect = ({
     </div>
   );
 };
+
+const InfoPill = ({ icon, label, value, isLowCase = false }: { icon: React.ReactNode; label: string; value: string; isLowCase?: boolean }) => (
+  <div className="flex items-center gap-4 px-5 py-3 rounded-full bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:border-indigo-100 group w-full">
+    <div className="text-indigo-500 group-hover:scale-110 transition-transform shrink-0">{icon}</div>
+    <div className="flex items-center justify-between flex-1 min-w-0">
+      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest shrink-0">{label}</span>
+      <span className={`text-[13px] font-bold text-slate-700 truncate pl-3 ${isLowCase ? 'lowercase' : 'uppercase'}`}>{value}</span>
+    </div>
+  </div>
+);
+
+const StudentProfileModal = ({ 
+  student, 
+  onClose, 
+  getYearLabel 
+}: { 
+  student: Student; 
+  onClose: () => void; 
+  getYearLabel: (y: number) => string;
+}) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+      className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl relative overflow-hidden no-scrollbar border border-white/20"
+    >
+      {/* Decorative Banner */}
+      <div className="h-28 bg-gradient-to-br from-indigo-50 to-white relative border-b border-slate-100">
+         <button 
+           onClick={onClose} 
+           className="absolute top-5 right-5 p-2 bg-slate-200/50 hover:bg-slate-300/50 text-slate-500 rounded-full transition-colors z-10"
+         >
+           <X size={16} />
+         </button>
+      </div>
+
+      <div className="px-6 pb-8 -mt-12 relative z-10 text-center">
+        {/* Profile Avatar */}
+        <div className="inline-block relative mb-4">
+          <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-2xl border-4 border-white overflow-hidden">
+             <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
+                <UserCircle size={80} />
+             </div>
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-green-500 border-4 border-white rounded-full shadow-lg" />
+        </div>
+
+        {/* Identity Section */}
+        <h2 className="text-3xl font-black text-slate-900 capitalize tracking-tight leading-none mb-2">{student.name}</h2>
+        <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100/50 px-3 py-1 rounded-full mb-8">
+            <span className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">{student.identificationNumber}</span>
+        </div>
+
+        {/* Info Grid - Bento Pill Style */}
+        <div className="grid grid-cols-2 gap-2 mb-8">
+            <InfoPill icon={<GraduationCap size={12} />} label="Year" value={getYearLabel(student.year)} />
+            <InfoPill icon={<Hash size={12} />} label="Roll" value={student.rollNo.toString()} />
+            <div className="col-span-2">
+                <InfoPill icon={<Users size={12} />} label="Branch & Div" value={`${student.branch} - ${student.division}`} />
+            </div>
+            <div className="col-span-2">
+                <InfoPill icon={<Mail size={12} />} label="Email" value={student.email} isLowCase />
+            </div>
+            <div className="col-span-2">
+                <InfoPill icon={<Phone size={12} />} label="Contact" value={student.phone} />
+            </div>
+        </div>
+
+        {/* Final Actions */}
+        <div className="grid grid-cols-2 gap-2">
+          <a 
+            href={`tel:${student.phone}`} 
+            className="flex items-center justify-center py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest gap-2 hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-200"
+          >
+            <Phone size={14} /> Call
+          </a>
+          <a 
+            href={`mailto:${student.email}`}
+            className="flex items-center justify-center py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest gap-2 hover:bg-indigo-500 transition-all active:scale-95 shadow-xl shadow-indigo-100"
+          >
+            <Mail size={14} /> Email
+          </a>
+        </div>
+      </div>
+    </motion.div>
+  </div>
+);
+
+// --- MAIN COMPONENT ---
 
 export const StudentsInfoList = ({ students }: StudentsInfoListProps) => {
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
@@ -276,55 +368,16 @@ export const StudentsInfoList = ({ students }: StudentsInfoListProps) => {
         </div>
 
       {/* --- STUDENT PROFILE MODAL --- */}
-      {selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="w-full max-w-xl bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-y-auto max-h-[90vh] no-scrollbar">
-            <button onClick={() => setSelectedStudent(null)} className="absolute top-8 right-8 p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors">
-              <X size={20} />
-            </button>
-
-            <div className="text-center mb-10">
-              <div className="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-5 border border-indigo-100 shadow-inner">
-                <UserCircle size={56} />
-              </div>
-              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight leading-none">{selectedStudent.name}</h2>
-              <div className="flex items-center justify-center gap-2 mt-3">
-                 <span className="text-indigo-600 font-bold text-[11px] uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">{selectedStudent.identificationNumber}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-               <InfoTile icon={<Info size={16}/>} label="Internal ID" value={selectedStudent.id.toString()} />
-               <InfoTile icon={<GraduationCap size={16}/>} label="Academic Year" value={getYearLabel(selectedStudent.year)} />
-               <InfoTile icon={<Users size={16}/>} label="Branch & Division" value={`${selectedStudent.branch} - ${selectedStudent.division}`} />
-               <InfoTile icon={<Hash size={16}/>} label="Roll Number" value={selectedStudent.rollNo.toString()} />
-               <InfoTile icon={<Phone size={16}/>} label="Phone Number" value={selectedStudent.phone} />
-               <InfoTile icon={<Mail size={16}/>} label="Email Address" value={selectedStudent.email} />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <a href={`tel:${selectedStudent.phone}`} className="flex items-center justify-center py-4 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"><Phone size={16} /> Call</a>
-              <button 
-                 onClick={() => setSelectedStudent(null)}
-                 className="flex items-center justify-center py-4 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-100"
-              >
-                  Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {selectedStudent && (
+          <StudentProfileModal 
+            student={selectedStudent} 
+            onClose={() => setSelectedStudent(null)} 
+            getYearLabel={getYearLabel}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-const InfoTile = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="p-4 rounded-3xl border flex items-start gap-4 bg-slate-50 border-slate-100/80 transition-hover hover:border-indigo-100">
-    <div className="mt-1 text-indigo-500 bg-white p-2 rounded-xl shadow-sm border border-slate-100">{icon}</div>
-    <div className="min-w-0 flex-1">
-      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">{label}</p>
-      <p className="text-[14px] font-bold truncate leading-tight text-slate-800 uppercase">{value}</p>
-    </div>
-  </div>
-);
-
