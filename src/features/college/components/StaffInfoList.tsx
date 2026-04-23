@@ -1,9 +1,188 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Mail, Search, X, Shield, Star, CheckCircle, UserCircle, IdCard, Briefcase, ChevronDown, Users, School, MapPin, Activity } from 'lucide-react';
-import { fetchAvailableRoles, fetchAccountStatuses, fetchStaffMembers, updateStaffRole, updateStaffStatus, updateStaffClubAssignment } from '@/services/staffService';
+import { 
+  Phone, Mail, Search, X, Shield, Star, CheckCircle, 
+  UserCircle, IdCard, Briefcase, ChevronDown, Users, 
+  School, MapPin, Activity 
+} from 'lucide-react';
+import { 
+  fetchAvailableRoles, fetchAccountStatuses, fetchStaffMembers, 
+  updateStaffRole, updateStaffStatus, updateStaffClubAssignment 
+} from '@/services/staffService';
 import { getClubsByCollege} from '@/services/clubService'; 
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- HELPER COMPONENTS ---
+
+const StaffInfoPill = ({ icon, label, value, action, isLowCase = false }: { icon: React.ReactNode; label: string; value: string; action?: React.ReactNode; isLowCase?: boolean }) => (
+  <div className="flex flex-col gap-1.5 w-full">
+    <div className="flex items-center gap-3 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:border-indigo-100 group">
+      <div className="text-indigo-500 group-hover:scale-110 transition-transform shrink-0">{icon}</div>
+      <div className="flex items-center justify-between flex-1 min-w-0">
+        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest shrink-0">{label}</span>
+        <span className={`text-[12px] font-bold text-slate-700 truncate pl-3 ${isLowCase ? 'lowercase' : 'uppercase'}`}>{value}</span>
+      </div>
+    </div>
+    {action && <div className="px-2">{action}</div>}
+  </div>
+);
+
+const StaffProfileModal = ({ 
+  faculty, 
+  onClose, 
+  clubs, 
+  availableStatuses, 
+  availableRoles,
+  pendingClubChanges,
+  setPendingClubChanges,
+  handleUpdateClubDatabase,
+  pendingStatusChanges,
+  setPendingStatusChanges,
+  handleUpdateStatusDatabase,
+  pendingRoleChanges,
+  setPendingRoleChanges,
+  handleUpdateRoleDatabase
+}: any) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+      className="w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl relative overflow-hidden no-scrollbar border border-white/20"
+    >
+      {/* Decorative Banner */}
+      <div className="h-28 bg-gradient-to-br from-indigo-50 to-white relative border-b border-slate-100">
+         <button 
+           onClick={onClose} 
+           className="absolute top-5 right-5 p-2 bg-slate-200/50 hover:bg-slate-300/50 text-slate-500 rounded-full transition-colors z-10"
+         >
+           <X size={16} />
+         </button>
+      </div>
+
+      <div className="px-6 pb-8 -mt-12 relative z-10 text-center">
+        {/* Profile Avatar */}
+        <div className="inline-block relative mb-4">
+          <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-2xl border-4 border-white overflow-hidden">
+             <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
+                <UserCircle size={80} />
+             </div>
+          </div>
+          <div className={`absolute -bottom-1 -right-1 w-7 h-7 border-4 border-white rounded-full shadow-lg ${faculty.status === 'ACTIVE' ? 'bg-green-500' : 'bg-slate-300'}`} />
+        </div>
+
+        {/* Identity Section */}
+        <h2 className="text-3xl font-black text-slate-900 capitalize tracking-tight leading-none mb-2">{faculty.name}</h2>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+            <span className="text-indigo-600 font-black text-[10px] uppercase tracking-widest bg-indigo-50 border border-indigo-100/50 px-3 py-1 rounded-full">
+              {faculty.designation.replace('_', ' ')} — {faculty.employeeId}
+            </span>
+            {faculty.hod && (
+              <span className="bg-amber-100 text-amber-700 font-black text-[9px] px-3 py-1 rounded-full border border-amber-200 uppercase tracking-widest">HOD</span>
+            )}
+        </div>
+
+        {/* Info Grid - Strict Two Column Style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-3 mb-8 text-left">
+            <StaffInfoPill icon={<IdCard size={14}/>} label="EMPLOYEE ID" value={faculty.employeeId} />
+            <StaffInfoPill icon={<Briefcase size={14}/>} label="DEPARTMENT" value={faculty.branchShortForm} />
+            
+            <StaffInfoPill 
+              icon={<Shield size={14}/>} 
+              label="SYSTEM ROLE" 
+              value={faculty.role.replace('ROLE_', '')}
+              action={
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <select 
+                      className="appearance-none w-full bg-indigo-50 border border-indigo-100 rounded-xl pl-3 pr-8 py-2 text-[11px] font-black text-indigo-700 outline-none"
+                      value={pendingRoleChanges[faculty.id] || faculty.role}
+                      onChange={(e) => setPendingRoleChanges({ ...pendingRoleChanges, [faculty.id]: e.target.value })}
+                    >
+                      {availableRoles.map(role => <option key={role} value={role}>{role.replace('ROLE_', '')}</option>)}
+                    </select>
+                    <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none" />
+                  </div>
+                  {pendingRoleChanges[faculty.id] && pendingRoleChanges[faculty.id] !== faculty.role && (
+                    <button onClick={() => handleUpdateRoleDatabase(faculty.id)} className="bg-indigo-600 text-white text-[9px] font-black px-3 py-2 rounded-xl">UPDATE</button>
+                  )}
+                </div>
+              }
+            />
+            
+            <StaffInfoPill 
+              icon={<Users size={14}/>} 
+              label="CLUB ASSIGN" 
+              value={faculty.managedClubDetails?.shortForm || "NONE"}
+              action={
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <select 
+                      className="appearance-none w-full bg-emerald-50 border border-emerald-100 rounded-xl pl-3 pr-8 py-2 text-[11px] font-black text-emerald-700 outline-none"
+                      value={pendingClubChanges[faculty.id] !== undefined ? pendingClubChanges[faculty.id] : (faculty.managedClubDetails?.id || "NONE")}
+                      onChange={(e) => setPendingClubChanges({ ...pendingClubChanges, [faculty.id]: e.target.value })}
+                    >
+                      <option value="NONE">NONE</option>
+                      {clubs.map(c => <option key={c.id} value={c.id}>{c.shortForm}</option>)}
+                    </select>
+                    <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-emerald-400 pointer-events-none" />
+                  </div>
+                  {pendingClubChanges[faculty.id] !== undefined && pendingClubChanges[faculty.id] !== String(faculty.managedClubDetails?.id || "NONE") && (
+                    <button onClick={() => handleUpdateClubDatabase(faculty.id)} className="bg-emerald-600 text-white text-[9px] font-black px-3 py-2 rounded-xl">SAVE</button>
+                  )}
+                </div>
+              }
+            />
+
+            <StaffInfoPill 
+              icon={<Activity size={14}/>} 
+              label="STATUS" 
+              value={faculty.status}
+              action={
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <select 
+                      className="appearance-none w-full bg-orange-50 border border-orange-100 rounded-xl pl-3 pr-8 py-2 text-[11px] font-black text-orange-700 outline-none"
+                      value={pendingStatusChanges[faculty.id] || faculty.status}
+                      onChange={(e) => setPendingStatusChanges({ ...pendingStatusChanges, [faculty.id]: e.target.value })}
+                    >
+                      {availableStatuses.map(st => <option key={st} value={st}>{st}</option>)}
+                    </select>
+                    <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-orange-400 pointer-events-none" />
+                  </div>
+                  {pendingStatusChanges[faculty.id] && pendingStatusChanges[faculty.id] !== faculty.status && (
+                    <button onClick={() => handleUpdateStatusDatabase(faculty.id)} className="bg-orange-600 text-white text-[9px] font-black px-3 py-2 rounded-xl">UPDATE</button>
+                  )}
+                </div>
+              }
+            />
+
+            <StaffInfoPill icon={<Mail size={14}/>} label="EMAIL" value={faculty.email} isLowCase />
+            <StaffInfoPill icon={<Phone size={14}/>} label="CONTACT" value={faculty.phone} />
+        </div>
+
+        {/* Final Actions */}
+        <div className="grid grid-cols-2 gap-2">
+          <a 
+            href={`tel:${faculty.phone}`} 
+            className="flex items-center justify-center py-4 bg-slate-900 text-white rounded-full font-black text-[10px] uppercase tracking-widest gap-2 hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-200"
+          >
+            <Phone size={14} /> Call
+          </a>
+          <a 
+            href={`mailto:${faculty.email}`}
+            className="flex items-center justify-center py-4 bg-indigo-600 text-white rounded-full font-black text-[10px] uppercase tracking-widest gap-2 hover:bg-indigo-500 transition-all active:scale-95 shadow-xl shadow-indigo-100"
+          >
+            <Mail size={14} /> Email
+          </a>
+        </div>
+      </div>
+    </motion.div>
+  </div>
+);
+
+// --- MAIN COMPONENT ---
 
 export const StaffInfoList = () => {
   const [activeTab, setActiveTab] = useState('ACTIVE');
@@ -237,118 +416,27 @@ export const StaffInfoList = () => {
           </table>
         </div>
 
-        {/* --- ENHANCED MODAL --- */}
-      {selectedFaculty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="w-full max-w-xl bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-y-auto max-h-[90vh] no-scrollbar">
-            <button onClick={() => setSelectedFaculty(null)} className="absolute top-8 right-8 p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors"><X size={20} /></button>
-
-            <div className="text-center mb-10">
-              <div className="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-5 border border-indigo-100 shadow-inner">
-                <UserCircle size={56} />
-              </div>
-              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight leading-none">{selectedFaculty.name}</h2>
-              <div className="flex items-center justify-center gap-2 mt-3">
-                 <span className="text-indigo-600 font-bold text-[11px] uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">{selectedFaculty.designation.replace('_', ' ')}</span>
-                 {selectedFaculty.hod && <span className="bg-amber-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase">HOD</span>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-               <InfoTile icon={<IdCard size={16}/>} label="Employee ID" value={selectedFaculty.employeeId} />
-               
-               {/* CLUB ACTION IN MODAL */}
-               <InfoTile icon={<Users size={16}/>} label="Managed Club" 
-                  action={
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="relative flex-1">
-                        <select 
-                          className="appearance-none w-full bg-emerald-50 border border-emerald-100 rounded-xl pl-3 pr-8 py-2 text-[11px] font-black text-emerald-700 outline-none"
-                          value={pendingClubChanges[selectedFaculty.id] !== undefined ? pendingClubChanges[selectedFaculty.id] : (selectedFaculty.managedClubDetails?.id || "NONE")}
-                          onChange={(e) => setPendingClubChanges({ ...pendingClubChanges, [selectedFaculty.id]: e.target.value })}
-                        >
-                          <option value="NONE">NONE</option>
-                          {clubs.map(c => <option key={c.id} value={c.id}>{c.shortForm}</option>)}
-                        </select>
-                        <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-emerald-400 pointer-events-none" />
-                      </div>
-                      {pendingClubChanges[selectedFaculty.id] !== undefined && pendingClubChanges[selectedFaculty.id] !== String(selectedFaculty.managedClubDetails?.id || "NONE") && (
-                        <button onClick={() => handleUpdateClubDatabase(selectedFaculty.id)} className="bg-emerald-600 text-white text-[9px] font-black px-3 py-2 rounded-xl">SAVE</button>
-                      )}
-                    </div>
-                  }
-                  value={selectedFaculty.managedClubDetails?.name || "No Assignment"} 
-               />
-
-               <InfoTile icon={<Briefcase size={16}/>} label="Branch / Dept" value={`${selectedFaculty.branchName} (${selectedFaculty.branchShortForm})`} />
-               
-               {/* STATUS ACTION IN MODAL */}
-               <InfoTile icon={<Activity size={16}/>} label="Account Status" 
-                  action={
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="relative flex-1">
-                        <select 
-                          className="appearance-none w-full bg-orange-50 border border-orange-100 rounded-xl pl-3 pr-8 py-2 text-[11px] font-black text-orange-700 outline-none"
-                          value={pendingStatusChanges[selectedFaculty.id] || selectedFaculty.status}
-                          onChange={(e) => setPendingStatusChanges({ ...pendingStatusChanges, [selectedFaculty.id]: e.target.value })}
-                        >
-                          {availableStatuses.map(st => <option key={st} value={st}>{st}</option>)}
-                        </select>
-                        <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-orange-400 pointer-events-none" />
-                      </div>
-                      {pendingStatusChanges[selectedFaculty.id] && pendingStatusChanges[selectedFaculty.id] !== selectedFaculty.status && (
-                        <button onClick={() => handleUpdateStatusDatabase(selectedFaculty.id)} className="bg-orange-600 text-white text-[9px] font-black px-3 py-2 rounded-xl">UPDATE</button>
-                      )}
-                    </div>
-                  }
-                  value={selectedFaculty.status} 
-               />
-
-               {/* ROLE ACTION IN MODAL */}
-               <InfoTile icon={<Shield size={16}/>} label="System Role" 
-                  action={
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="relative flex-1">
-                        <select 
-                          className="appearance-none w-full bg-indigo-50 border border-indigo-100 rounded-xl pl-3 pr-8 py-2 text-[11px] font-black text-indigo-700 outline-none"
-                          value={pendingRoleChanges[selectedFaculty.id] || selectedFaculty.role}
-                          onChange={(e) => setPendingRoleChanges({ ...pendingRoleChanges, [selectedFaculty.id]: e.target.value })}
-                        >
-                          {availableRoles.map(role => <option key={role} value={role}>{role.replace('ROLE_', '')}</option>)}
-                        </select>
-                        <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none" />
-                      </div>
-                      {pendingRoleChanges[selectedFaculty.id] && pendingRoleChanges[selectedFaculty.id] !== selectedFaculty.role && (
-                        <button onClick={() => handleUpdateRoleDatabase(selectedFaculty.id)} className="bg-indigo-600 text-white text-[9px] font-black px-3 py-2 rounded-xl">UPDATE</button>
-                      )}
-                    </div>
-                  }
-                  value={selectedFaculty.role.replace('ROLE_', '')} 
-               />
-
-               <InfoTile icon={<School size={16}/>} label="College ID" value={`COL-ID: ${selectedFaculty.collegeId}`} />
-               <InfoTile icon={<Mail size={16}/>} label="Official Email" value={selectedFaculty.email} />
-               <InfoTile icon={<Phone size={16}/>} label="Contact Number" value={selectedFaculty.phone} />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <a href={`tel:${selectedFaculty.phone}`} className="flex items-center justify-center py-4 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"><Phone size={16} /> Call</a>
-              <a href={`mailto:${selectedFaculty.email}`} className="flex items-center justify-center py-4 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-100"><Mail size={16} /> Email</a>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* --- STAFF PROFILE MODAL --- */}
+        <AnimatePresence>
+          {selectedFaculty && (
+            <StaffProfileModal 
+              faculty={selectedFaculty} 
+              onClose={() => setSelectedFaculty(null)} 
+              clubs={clubs}
+              availableStatuses={availableStatuses}
+              availableRoles={availableRoles}
+              pendingClubChanges={pendingClubChanges}
+              setPendingClubChanges={setPendingClubChanges}
+              handleUpdateClubDatabase={handleUpdateClubDatabase}
+              pendingStatusChanges={pendingStatusChanges}
+              setPendingStatusChanges={setPendingStatusChanges}
+              handleUpdateStatusDatabase={handleUpdateStatusDatabase}
+              pendingRoleChanges={pendingRoleChanges}
+              setPendingRoleChanges={setPendingRoleChanges}
+              handleUpdateRoleDatabase={handleUpdateRoleDatabase}
+            />
+          )}
+        </AnimatePresence>
     </div>
   );
 };
-
-const InfoTile = ({ icon, label, value, action }) => (
-  <div className="p-4 rounded-3xl border flex items-start gap-4 bg-slate-50 border-slate-100/80 transition-hover hover:border-indigo-100">
-    <div className="mt-1 text-indigo-500 bg-white p-2 rounded-xl shadow-sm border border-slate-100">{icon}</div>
-    <div className="min-w-0 flex-1">
-      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">{label}</p>
-      <p className="text-[14px] font-bold truncate leading-tight text-slate-800">{value}</p>
-      {action && action}
-    </div>
-  </div>
-);
