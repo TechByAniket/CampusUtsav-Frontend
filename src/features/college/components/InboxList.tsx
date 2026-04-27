@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, X, Calendar, Clock, MapPin, 
   CheckCircle2, RotateCcw, Tag, Layers, 
   AlertCircle, Image as ImageIcon, Send, Edit3, Globe, Lock, Phone,
-  ArrowRight, Filter, MessageSquare, History
+  ArrowRight, Filter, MessageSquare, History,
+  ChevronRight, Info, LayoutDashboard,
+  Hash
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -82,281 +84,271 @@ export const InboxList = ({ mode = 'COLLEGE' }) => {
     } catch (err: any) { toast.error(err.message); }
   };
 
-  const filteredEvents = eventList.filter(e => 
-    e.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEvents = useMemo(() => {
+    return eventList.filter(e => 
+      e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.id.toString().includes(searchQuery)
+    );
+  }, [eventList, searchQuery]);
+
+  const getStatusStyles = (status: string) => {
+    switch(status.toUpperCase()) {
+      case 'APPROVED': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+      case 'REVERTED': return 'bg-amber-50 text-amber-600 border-amber-100';
+      case 'REJECTED': return 'bg-rose-50 text-rose-600 border-rose-100';
+      case 'SUBMITTED': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'HOD_APPROVED': return 'bg-cyan-50 text-cyan-600 border-cyan-100';
+      case 'FACULTY1_APPROVED': return 'bg-violet-50 text-violet-600 border-violet-100';
+      default: return 'bg-slate-50 text-slate-500 border-slate-200';
+    }
+  };
 
   return (
-    <section className="w-full min-h-screen bg-slate-50/50 py-4 px-2 md:px-6 font-sans text-slate-900">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header and Stats */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+    <section className="w-full min-h-screen bg-white py-4 font-sans text-slate-900 selection:bg-indigo-100">
+      <div className="max-w-[1550px] mx-auto space-y-10 px-6 md:px-8">
+        
+        {/* --- HEADER --- */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-3">
-              {mode === 'CLUB' ? 'Actions Required' : 'Event Approvals'}
-              <span className="px-2.5 py-1 bg-orange-50 text-orange-600 text-xs font-bold rounded-lg border border-orange-100 flex items-center justify-center min-w-[28px]">
-                {filteredEvents.length}
-              </span>
-            </h2>
-            <p className="text-xs font-medium text-slate-400">
-                {mode === 'CLUB' ? 'Events that need your attention for resubmission' : 'Pending club events awaiting your review'}
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
+                {mode === 'CLUB' ? 'Action Required' : 'Inbox Console'}
+            </h1>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+                {mode === 'CLUB' ? 'Pending Revisions & Corrections' : 'Institutional Approval Workflow'}
             </p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="relative group flex-1 md:flex-none">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" size={16} />
-              <input 
-                type="text" 
-                placeholder="Find an event..." 
-                className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none w-full md:w-72 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/5 transition-all font-medium" 
-                onChange={(e) => setSearchQuery(e.target.value)} 
-              />
-            </div>
-            <Button variant="outline" size="icon" className="rounded-xl border-slate-200 text-slate-500 hover:text-orange-500 hover:bg-orange-50">
-                <Filter size={18} />
-            </Button>
+          
+          <div className="flex items-center gap-4">
+             <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                <input 
+                    type="text" 
+                    placeholder="Search by title or ID..." 
+                    className="pl-11 pr-6 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:border-indigo-300 w-full md:w-80 font-bold shadow-sm transition-all" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)} 
+                />
+             </div>
+             <div className="px-5 py-3 bg-slate-100 rounded-2xl flex items-center gap-3">
+                 <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{filteredEvents.length} Pending Tasks</span>
+             </div>
           </div>
-        </div>
+        </header>
 
-        {/* List Content */}
-        <div className="space-y-3">
-          {isLoading ? (
-            <div className="py-20 text-center space-y-4">
-                 <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mx-auto" />
-                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Loading Inbox...</p>
+        {/* --- MAIN TABLE AREA --- */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50 min-h-[500px]">
+          
+          {/* TOOLBAR */}
+          <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/20">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-indigo-600 rounded-full" />
+              <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">
+                 {mode === 'CLUB' ? 'Reverted Submissions' : 'Approval Inbox'}
+              </h2>
             </div>
-          ) : (
-            <>
-              <AnimatePresence initial={false}>
-                {filteredEvents.map((event, index) => (
-                  <motion.div 
-                    layout
-                    key={event.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="group bg-white p-4 rounded-3xl border border-slate-200/60 hover:border-orange-500/30 hover:shadow-xl hover:shadow-orange-500/5 transition-all cursor-pointer"
-                    onClick={() => setSelectedEvent(event)}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center gap-5">
-                      <div className="relative w-full md:w-24 h-48 md:h-32 shrink-0 overflow-hidden rounded-2xl">
-                          <img src={event.posterUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="poster" />
-                          <div className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm">
-                             <p className="text-[10px] font-black text-slate-900">{event.clubNameShortForm || "CLUB"}</p>
-                          </div>
-                      </div>
+          </div>
 
-                      <div className="flex-1 space-y-3">
-                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-wider rounded border border-orange-100">
-                                {event.eventCategory}
-                            </span>
-                            <span className="px-2 py-0.5 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider rounded border border-slate-100">
-                                {event.eventType}
-                            </span>
-                         </div>
-
-                         <div>
-                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight leading-tight group-hover:text-orange-600 transition-colors">
-                                {event.title}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[11px] font-bold text-slate-400">
-                                <span className="flex items-center gap-1.5"><Calendar size={12}/> {event.date}</span>
-                                <span className="flex items-center gap-1.5"><Clock size={12}/> {event.startTime?.slice(0,5)}</span>
-                                <span className="flex items-center gap-1.5"><MapPin size={12}/> {event.venue?.slice(0, 30)}...</span>
-                            </div>
-                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 md:pl-6 md:border-l border-slate-100 shrink-0">
-                         <Button 
-                            variant="secondary" 
-                            className="rounded-2xl bg-slate-50 text-slate-900 font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 hover:text-white transition-all px-6 border border-slate-100"
-                            onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); }}
-                         >
-                            Review Details <ArrowRight size={14} className="ml-2" />
-                         </Button>
-                         {mode === 'CLUB' && (
-                           <Button 
-                              onClick={(e) => { e.stopPropagation(); openResubmitForm(event.id); }} 
-                              className="rounded-2xl bg-indigo-600 text-white font-black uppercase text-[10px] tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-100"
-                            >
-                                <Edit3 size={14} />
-                            </Button>
-                         )}
-                      </div>
+          {/* TABLE VIEW */}
+          <div className="overflow-x-auto no-scrollbar">
+            {isLoading ? (
+                <div className="py-40 flex flex-col items-center justify-center space-y-6">
+                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Compiling Records...</p>
+                </div>
+            ) : filteredEvents.length === 0 ? (
+                <div className="py-40 text-center flex flex-col items-center justify-center">
+                    <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mb-6 border border-slate-100">
+                        <AlertCircle size={40} />
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              
-              {filteredEvents.length === 0 && (
-                <motion.div 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 1 }} 
-                  className="py-24 text-center space-y-3"
-                >
-                    <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <AlertCircle size={32} />
-                    </div>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">No pending approvals</p>
-                    <p className="text-[10px] font-bold text-slate-300">You're all caught up for today!</p>
-                </motion.div>
-              )}
-            </>
-          )}
+                    <p className="text-slate-400 font-black text-sm uppercase tracking-widest">Inbox is clear. No pending items.</p>
+                </div>
+            ) : (
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 text-left">
+                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Event Identity</th>
+                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Schedule & Logistics</th>
+                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Current Progress</th>
+                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {filteredEvents.map((event) => (
+                            <tr key={event.id} className="hover:bg-indigo-50/30 transition-colors group">
+                                <td className="px-8 py-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 border-4 border-white shadow-md shrink-0 relative">
+                                            {event.posterUrl ? (
+                                                <img src={event.posterUrl} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={20}/></div>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="font-black text-slate-800 uppercase text-sm truncate max-w-[280px] group-hover:text-indigo-600 transition-colors leading-tight">{event.title}</div>
+                                            <div className="flex items-center gap-2 mt-1.5">
+                                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100/50">#{event.id}</span>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.clubNameShortForm || "CLUB"}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td className="px-8 py-5">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2.5 text-[11px] font-black text-slate-700 uppercase tracking-tight">
+                                            <Calendar className="size-3 text-indigo-500" /> {event.date}
+                                        </div>
+                                        <div className="flex items-center gap-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            <MapPin className="size-3 text-slate-300" /> {event.venue?.slice(0, 25)}...
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td className="px-8 py-5">
+                                    <div className="flex flex-col gap-2">
+                                        <span className={`inline-flex items-center px-3.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border w-fit shadow-sm ${getStatusStyles(event.status)}`}>
+                                            {event.status.replace('_', ' ')}
+                                        </span>
+                                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">
+                                            <Clock className="size-2.5 text-slate-300" /> {event.startTime?.slice(0,5)}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td className="px-8 py-5">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button 
+                                            onClick={() => setSelectedEvent(event)}
+                                            className="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+                                        >
+                                            Review Details <Info size={14} />
+                                        </button>
+                                        {mode === 'CLUB' && (
+                                            <button 
+                                                onClick={() => openResubmitForm(event.id)}
+                                                className="px-5 py-2.5 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:shadow-lg transition-all active:scale-95 group/btn flex items-center gap-2 shadow-xl shadow-slate-100"
+                                            >
+                                                Edit <Edit3 size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Review Modal */}
+      {/* --- CAPSULE-LITE REVIEW MODAL --- */}
       <AnimatePresence>
         {selectedEvent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto no-scrollbar">
             <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                exit={{ opacity: 0 }}
-                onClick={() => { setSelectedEvent(null); setIsResubmitting(false); setActionRemark(""); }}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
-            />
-            
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className={`w-full ${isResubmitting ? 'max-w-4xl' : 'max-w-lg'} bg-white rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-slate-200 my-auto`}
             >
-              <button 
-                onClick={() => { setSelectedEvent(null); setIsResubmitting(false); setActionRemark(""); }} 
-                className="absolute top-5 right-5 p-2 bg-white/80 backdrop-blur-md text-slate-400 rounded-full hover:bg-white hover:text-orange-500 z-50 shadow-sm transition-all"
-              >
-                <X size={20} />
-              </button>
-
-              {isResubmitting ? (
-                <div className="w-full overflow-y-auto no-scrollbar p-8">
-                    <OnePageCreateEventForm
-                        initialData={selectedEvent as any} 
-                        isModal={true} 
-                        onClose={() => { setSelectedEvent(null); setIsResubmitting(false); loadEvents(); }} 
-                    />
-                </div>
-              ) : (
-                <>
-                  <div className="w-full md:w-[380px] shrink-0 bg-slate-50 border-r border-slate-100 flex flex-col p-6 overflow-y-auto">
-                      <div className="relative group rounded-3xl overflow-hidden shadow-2xl shadow-slate-200 aspect-[3/4.5] mb-6">
-                          <img src={selectedEvent.posterUrl} className="w-full h-full object-cover" alt="Event" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex items-bottom justify-start p-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <p className="text-[10px] font-black text-white uppercase tracking-widest mt-auto">Poster Preview</p>
-                          </div>
-                      </div>
-
-                      <div className="mt-auto space-y-4">
-                          <div className="p-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><History size={10}/> Club Status</p>
-                              <div className="flex items-center justify-between">
-                                 <p className="text-xs font-black text-slate-900 uppercase">{selectedEvent.clubNameShortForm || "PRIVATE CLUB"}</p>
-                                 <span className="bg-orange-50 text-orange-600 border border-orange-100 text-[10px] py-1 px-3 font-black uppercase tracking-widest rounded-full">OWNER</span>
-                              </div>
-                          </div>
-                          <div className="p-4 bg-orange-600 rounded-2xl shadow-xl shadow-orange-100 text-white group cursor-pointer hover:bg-orange-700 transition-colors">
-                              <p className="text-[9px] font-black text-white/60 uppercase tracking-widest mb-1">Verify Event ID</p>
-                              <p className="text-sm font-black uppercase tracking-tight">#{selectedEvent.id.toString().padStart(6, '0')}</p>
-                          </div>
+              {/* Header: Clean & Compact */}
+              <div className="px-8 py-6 border-b border-slate-50 bg-slate-50/30 flex items-center gap-5">
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white shadow-sm shrink-0">
+                      <img src={selectedEvent.posterUrl} className="w-full h-full object-cover" alt="" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                      <h3 className="text-base font-black text-slate-900 uppercase truncate leading-tight mb-1">{selectedEvent.title}</h3>
+                      <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black text-indigo-600 bg-white border border-indigo-100 px-2 py-0.5 rounded-lg">ID #{selectedEvent.id}</span>
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${getStatusStyles(selectedEvent.status)}`}>
+                              {selectedEvent.status}
+                          </span>
                       </div>
                   </div>
-                  
-                  <div className="flex-1 flex flex-col p-8 overflow-y-auto no-scrollbar">
-                    <div className="space-y-6">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-orange-100">{selectedEvent.eventCategory}</span>
-                        <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-100">{selectedEvent.eventType}</span>
+                  <button onClick={() => { setSelectedEvent(null); setIsResubmitting(false); setActionRemark(""); }} className="p-2 text-slate-300 hover:text-slate-600 transition-colors"><X size={20}/></button>
+              </div>
+
+              <div className="max-h-[85vh] overflow-y-auto no-scrollbar">
+                {isResubmitting ? (
+                  <OnePageCreateEventForm
+                      initialData={selectedEvent as any} 
+                      isModal={true} 
+                      onClose={() => { setSelectedEvent(null); setIsResubmitting(false); loadEvents(); }} 
+                  />
+                ) : (
+                  <div className="p-10 space-y-10">
+                    {/* KEY DETAILS IN A CAPSULE GRID */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <CapsuleDetail icon={<Calendar size={14}/>} label="Date" value={selectedEvent.date} />
+                        <CapsuleDetail icon={<Clock size={14}/>} label="Time" value={selectedEvent.startTime?.slice(0,5)} />
+                        <CapsuleDetail icon={<MapPin size={14}/>} label="Venue" value={selectedEvent.venue} />
+                        <CapsuleDetail icon={<Tag size={14}/>} label="Category" value={selectedEvent.eventCategory} />
+                    </div>
+
+                    {/* Description Strip */}
+                    <div className="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100">
+                        <p className="text-[12px] font-bold text-slate-500 leading-relaxed italic">
+                            "{selectedEvent.description}"
+                        </p>
+                    </div>
+
+                    {/* Previous Remarks (If any) */}
+                    {selectedEvent.remarks && (
+                      <div className="p-4 bg-orange-50 border border-orange-100 rounded-[1.5rem] flex gap-3 items-center">
+                          <AlertCircle size={18} className="shrink-0 text-orange-500" />
+                          <div className="min-w-0">
+                              <p className="text-[9px] font-black uppercase text-orange-600 mb-0.5 tracking-widest">Previous Feedback</p>
+                              <p className="text-[12px] font-black text-orange-900 leading-snug">"{selectedEvent.remarks}"</p>
+                          </div>
                       </div>
-                      
-                      <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tight leading-none mb-4">{selectedEvent.title}</h2>
-                      
-                      {selectedEvent.remarks && (
-                        <div className="p-5 bg-orange-50/50 border-l-4 border-orange-400 rounded-r-2xl text-[11px] font-bold text-slate-700 flex gap-4">
-                            <AlertCircle size={18} className="shrink-0 text-orange-500" />
-                            <div>
-                                <p className="text-[9px] font-black uppercase text-orange-600 mb-1 tracking-widest">Review History</p>
-                                "{selectedEvent.remarks}"
+                    )}
+
+                    {/* Review Section */}
+                    {mode !== 'CLUB' && (
+                        <div className="space-y-6 pt-2">
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-black uppercase text-slate-400 ml-4 tracking-widest">Official Review Remarks</label>
+                                <textarea 
+                                    rows={2}
+                                    value={actionRemark}
+                                    onChange={(e) => setActionRemark(e.target.value)}
+                                    placeholder="Type your notes for the club admin..." 
+                                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[1.8rem] text-[13px] font-bold uppercase outline-none focus:border-indigo-500 transition-all text-slate-900"
+                                />
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => handleAction(selectedEvent.id, 'REVERT', actionRemark)} 
+                                    className="flex-1 py-4 bg-white border-2 border-orange-500 text-orange-600 rounded-[1.5rem] font-black uppercase text-[11px] tracking-widest hover:bg-orange-50 transition-all shadow-sm active:scale-95"
+                                >
+                                    Revert
+                                </button>
+                                <button 
+                                    onClick={() => handleAction(selectedEvent.id, 'APPROVED', actionRemark)} 
+                                    className="flex-[2] py-4 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase text-[11px] tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-100 active:scale-95"
+                                >
+                                    Approve
+                                </button>
                             </div>
                         </div>
-                      )}
+                    )}
 
-                      <div className="grid grid-cols-2 gap-4">
-                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                              <label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1.5"><Calendar size={12}/> Date</label>
-                              <div className="text-xs font-black text-slate-800 uppercase">{selectedEvent.date}</div>
-                          </div>
-                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                              <label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1.5"><Clock size={12}/> Timing</label>
-                              <div className="text-xs font-black text-slate-800 uppercase">{selectedEvent.startTime?.slice(0,5)} - {selectedEvent.endTime?.slice(0,5)}</div>
-                          </div>
-                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1 overflow-hidden">
-                              <label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1.5"><MapPin size={12}/> Venue</label>
-                              <div className="text-xs font-black text-slate-800 uppercase truncate">{selectedEvent.venue}</div>
-                          </div>
-                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                              <label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1.5"><Tag size={12}/> Entry Fee</label>
-                              <div className="text-xs font-black text-slate-800 uppercase">₹{selectedEvent.fees}</div>
-                          </div>
-                      </div>
-
-                      <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5"><MessageSquare size={12}/> Full Description</label>
-                           <p className="text-xs font-medium text-slate-500 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">{selectedEvent.description}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-10 pt-6 border-t border-slate-100">
-                      {mode === 'CLUB' ? (
-                        <Button 
+                    {mode === 'CLUB' && (
+                        <button 
                             onClick={() => openResubmitForm(selectedEvent.id)} 
-                            className="w-full py-7 bg-orange-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-700 transition-all shadow-xl shadow-orange-100 animate-pulse"
+                            className="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-[11px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
                         >
-                            <Edit3 size={18} /> Edit & Resubmit Proposal
-                        </Button>
-                      ) : (
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                               <label className="text-[9px] font-black uppercase text-slate-400 ml-2 tracking-widest">Review Remarks</label>
-                               <div className="relative group">
-                                    <MessageSquare className="absolute left-4 top-4 text-slate-300 group-focus-within:text-orange-500 transition-colors" size={18} />
-                                    <textarea 
-                                        rows={2}
-                                        value={actionRemark}
-                                        onChange={(e) => setActionRemark(e.target.value)}
-                                        placeholder="Add notes for the club admin..." 
-                                        className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold uppercase outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 transition-all text-slate-900"
-                                    />
-                               </div>
-                          </div>
-                          <div className="flex flex-col md:flex-row gap-4">
-                            <Button 
-                               variant="outline"
-                               onClick={() => handleAction(selectedEvent.id, 'REVERT', actionRemark)} 
-                               className="flex-1 py-7 bg-white border-2 border-orange-500 text-orange-600 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-50 transition-all flex items-center justify-center gap-2"
-                            >
-                                <RotateCcw size={16} /> Revert to Club
-                            </Button>
-                            <Button 
-                              onClick={() => handleAction(selectedEvent.id, 'APPROVED', actionRemark)} 
-                              className="flex-[2] py-7 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
-                            >
-                                Approve Event Listing <CheckCircle2 size={16}/>
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                            <Edit3 size={18} className="mr-2 inline" /> Start Resubmission Flow
+                        </button>
+                    )}
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </motion.div>
           </div>
         )}
@@ -364,3 +356,13 @@ export const InboxList = ({ mode = 'COLLEGE' }) => {
     </section>
   );
 };
+
+const CapsuleDetail = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) => (
+    <div className="px-5 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] flex items-center gap-4 transition-all hover:bg-white hover:shadow-sm">
+        <div className="text-indigo-500 shrink-0">{icon}</div>
+        <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase text-slate-400 leading-none mb-1 tracking-wider">{label}</p>
+            <p className="text-[12px] font-black text-slate-800 uppercase truncate">{value || 'N/A'}</p>
+        </div>
+    </div>
+);

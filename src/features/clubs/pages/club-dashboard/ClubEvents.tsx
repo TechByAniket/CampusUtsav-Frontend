@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Search as SearchIcon, 
   Calendar as CalendarIcon, 
@@ -20,13 +20,15 @@ import {
   Layers,
   Zap,
   ArrowRight,
-  MessageSquare
+  MessageSquare,
+  Filter,
+  Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllEventsByClub, getEventApprovalHistory, getEventDetailsByEventId } from '@/services/eventService'; 
+import { getAllEventsByClub, getEventApprovalHistory, getEventDetailsByEventId, fetchEventStatuses } from '@/services/eventService'; 
 import { OnePageCreateEventForm } from '@/features/events/components/CreateEventForm';
 import type { RootState } from '@/store/store';
 
@@ -260,6 +262,12 @@ export const ClubEvents = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   
+  // Filtering Logic
+  const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  
   const navigate = useNavigate();
   const profileId = useSelector((state: RootState) => state.auth.profileId);
 
@@ -268,8 +276,12 @@ export const ClubEvents = () => {
       if (!profileId) return;
       setIsLoading(true);
       try {
-        const events = await getAllEventsByClub(profileId); 
+        const [events, statuses] = await Promise.all([
+            getAllEventsByClub(profileId),
+            fetchEventStatuses()
+        ]);
         setEventList(events || []);
+        setAvailableStatuses(statuses || []);
       } catch (err: any) {
         toast.error(err.message);
       } finally {
@@ -278,6 +290,17 @@ export const ClubEvents = () => {
     };
     loadData();
   }, [profileId]);
+
+  // Close filter on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+            setIsFilterOpen(false);
+        }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getCount = (status: string) => eventList.filter((e: any) => e.status === status).length;
 
@@ -301,12 +324,20 @@ export const ClubEvents = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    return eventList.filter((e: any) => 
-      e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.eventCategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.id.toString().includes(searchQuery)
+    return eventList.filter((e: any) => {
+      const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            e.eventCategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            e.id.toString().includes(searchQuery);
+      const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(e.status);
+      return matchesSearch && matchesStatus;
+    });
+  }, [eventList, searchQuery, selectedStatuses]);
+
+  const toggleStatus = (status: string) => {
+    setSelectedStatuses(prev => 
+        prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
     );
-  }, [eventList, searchQuery]);
+  };
 
   return (
     <div className="w-full min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
@@ -363,6 +394,57 @@ export const ClubEvents = () => {
               <div className="w-1.5 h-6 bg-indigo-600 rounded-full" />
               <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">Active Submissions</h2>
               <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest">{filteredEvents.length} Records</span>
+            </div>
+
+            {/* STATUS MULTI-CHECK FILTER */}
+            <div className="relative" ref={filterRef}>
+                <button 
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedStatuses.length > 0 ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-400'}`}
+                >
+                    <Filter size={14} /> {selectedStatuses.length > 0 ? `${selectedStatuses.length} Selected` : 'Filter Status'}
+                </button>
+
+                <AnimatePresence>
+                    {isFilterOpen && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            className="absolute right-0 mt-3 w-64 bg-white rounded-[1.5rem] shadow-2xl border border-slate-100 z-[60] overflow-hidden"
+                        >
+                            <div className="p-4 border-b border-slate-50 bg-slate-50/50">
+                                <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Select Statuses</p>
+                            </div>
+                            <div className="p-2 max-h-64 overflow-y-auto no-scrollbar">
+                                {availableStatuses.map(status => (
+                                    <button 
+                                        key={status}
+                                        onClick={() => toggleStatus(status)}
+                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                                    >
+                                        <span className={`text-[11px] font-bold uppercase tracking-tight ${selectedStatuses.includes(status) ? 'text-indigo-600' : 'text-slate-600'}`}>
+                                            {status.replace('_', ' ')}
+                                        </span>
+                                        <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${selectedStatuses.includes(status) ? 'bg-indigo-600 border-indigo-600 shadow-md shadow-indigo-100' : 'bg-white border-slate-200'}`}>
+                                            {selectedStatuses.includes(status) && <Check size={12} className="text-white" />}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                            {selectedStatuses.length > 0 && (
+                                <div className="p-2 border-t border-slate-50 bg-slate-50/30">
+                                    <button 
+                                        onClick={() => setSelectedStatuses([])}
+                                        className="w-full py-2 text-[9px] font-black uppercase text-indigo-600 hover:bg-white rounded-lg transition-colors"
+                                    >
+                                        Clear All Filters
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
           </div>
 
@@ -498,16 +580,16 @@ export const ClubEvents = () => {
           {editingEvent && (
               <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto no-scrollbar">
                   <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl relative overflow-hidden my-auto"
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl relative overflow-hidden border border-slate-200 my-auto"
                   >
                       <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                           <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 italic">Resubmit Proposal • #{editingEvent.id}</h3>
                           <button onClick={() => setEditingEvent(null)} className="p-2 text-slate-400 hover:text-slate-600 transition-colors"><X size={20}/></button>
                       </div>
-                      <div className="p-8 max-h-[80vh] overflow-y-auto no-scrollbar">
+                      <div className="max-h-[85vh] overflow-y-auto no-scrollbar">
                           <OnePageCreateEventForm 
                             initialData={editingEvent} 
                             isModal={true} 

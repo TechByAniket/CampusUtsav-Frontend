@@ -217,7 +217,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={`${isModal ? 'p-0' : 'p-8 md:p-12'} space-y-12`}>
+        <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-12">
           {step === 1 ? (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-10">
               <div className="space-y-5">
