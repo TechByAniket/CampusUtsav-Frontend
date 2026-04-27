@@ -84,6 +84,9 @@ function App() {
           <Route index element={<ClubOverview />} />
           <Route path="overview" element={<ClubOverview />} />
           <Route path="events" element={<ClubEvents />} />
+          <Route path="events/:id" element={<AdminEventDetailsPage />} />
+          <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
+          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
           <Route path="inbox" element={<ClubInbox />} />
         </Route>
       </Route>

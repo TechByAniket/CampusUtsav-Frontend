@@ -218,3 +218,17 @@ export const generateEventDescriptionAI = async (payload: { prompt: string;
     throw new Error(handleServiceError(error, "AI Synchronization Failed"));
   }
 }
+
+// ***************** GET EVENT APPROVAL HISTORY ***************** //
+export const getEventApprovalHistory = async (eventId: number | string) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/events/${eventId}/logs`, {
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("token"),
+      }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Fetching Approval History"));
+  }
+};
