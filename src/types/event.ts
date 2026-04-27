@@ -162,3 +162,40 @@ export interface AdminEventDetail {
   featured: boolean;
 }
 
+
+export interface RegistrationStudent {
+  id: number;
+  name: string;
+  gender: string;
+  identificationNumber: string;
+  email: string;
+  phone: string;
+  rollNo: number;
+  year: number;
+  division: string;
+  branch: string;
+  collegeId: number;
+}
+
+export interface TeamRegistration {
+  registrationId: number;
+  teamId: number;
+  teamName: string;
+  leader: RegistrationStudent;
+  members: RegistrationStudent[];
+  paymentDone: boolean;
+  registeredAt: string;
+}
+
+export interface IndividualRegistration {
+  registrationId: number;
+  student: RegistrationStudent;
+  paymentDone: boolean;
+  registeredAt: string;
+}
+
+export interface EventRegistrationsResponse {
+  eventId: number;
+  individuals: IndividualRegistration[];
+  teams: TeamRegistration[];
+}

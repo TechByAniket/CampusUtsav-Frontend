@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { fetchEventMetaData, createEvent, resubmitEvent } from '../../services/eventService';
+import { fetchEventMetaData, createEvent, resubmitEvent } from '@/services/eventService';
 import { getAllBranchesOfCollege } from '@/services/collegeService';
 
 export const OnePageCreateEventForm = ({ initialData = null, isModal = false, onClose }) => {

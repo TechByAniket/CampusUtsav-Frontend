@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { EventMultiStepForm } from "@/forms/events/EventMultiStepForm";
-import { OnePageCreateEventForm } from "@/forms/events/OnePageCreateEventForm";
+import { OnePageCreateEventForm } from "@/features/events/components/CreateEventForm";
 import React, { useState } from "react";
 
 export const ClubOverviewHero: React.FC = () => {
@@ -64,8 +63,7 @@ export const ClubOverviewHero: React.FC = () => {
 
     {/* Multi-step form */}
     <div className="flex-1 overflow-y-auto">
-      {/* <EventMultiStepForm /> */}
-      <OnePageCreateEventForm/>
+      <OnePageCreateEventForm isModal={true} onClose={closeModal} />
     </div>
   </div>
 </div>

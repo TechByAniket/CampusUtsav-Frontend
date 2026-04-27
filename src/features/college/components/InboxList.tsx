@@ -15,7 +15,7 @@ import {
   getRevertedEventsByClub,
   getEventDetailsByEventId 
 } from '@/services/eventService';
-import { OnePageCreateEventForm } from '@/forms/events/OnePageCreateEventForm';
+import { OnePageCreateEventForm } from '@/features/events/components/CreateEventForm';
 import { Button } from '@/components/ui/button';
 
 interface Event {

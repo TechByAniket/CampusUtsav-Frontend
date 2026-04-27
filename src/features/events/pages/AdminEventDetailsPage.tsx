@@ -18,11 +18,11 @@ import { Button } from '@/components/ui/button'
 // Components
 import { 
   BentoHeroPoster, BentoHeroDetail 
-} from '../new-components/BentoComponents'
-import { EventDetailCriteria } from '../new-components/EventDetailCriteria'
-import { EventDetailAttachments } from '../new-components/EventDetailAttachments'
-import { EventDetailOrganizer } from '../new-components/EventDetailOrganizer'
-import { AdminEventActions } from '../new-components/AdminEventActions'
+} from '../components/BentoComponents'
+import { EventDetailCriteria } from '../components/EventDetailCriteria'
+import { EventDetailAttachments } from '../components/EventDetailAttachments'
+import { EventDetailOrganizer } from '../components/EventDetailOrganizer'
+import { AdminEventActions } from '../components/AdminEventActions'
 
 export const AdminEventDetailsPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -83,17 +83,20 @@ export const AdminEventDetailsPage = () => {
   ];
 
   return (
-    <section className="w-full min-h-screen bg-white py-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
+    <section className="w-full min-h-screen bg-white pt-0 pb-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
       <div className="max-w-[1550px] mx-auto space-y-12">
         
-        {/* Navigation & Header Summary */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-1 border-b border-slate-100/80">
+        {/* Navigation & Informative Header (Floating) */}
+        <div className="relative z-[100]">
               <button 
                 onClick={() => navigate(-1)}
-                className="group flex items-center gap-3 text-slate-400 hover:text-indigo-600 transition-all"
+                className="absolute -top-6 left-0 group flex items-center gap-3 text-slate-500 hover:text-indigo-600 transition-all"
               >
-                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center group-hover:border-indigo-200 group-hover:bg-indigo-50 transition-all shadow-sm">
-                  <ChevronLeft size={22} />
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center group-hover:border-indigo-200 group-hover:bg-indigo-100 transition-all shadow-sm">
+                  <ChevronLeft size={18} className="text-indigo-600" />
+                </div>
+                <div className="flex flex-col items-start opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                   <p className="text-[9px] font-black text-indigo-600 uppercase tracking-[0.2em]">Return to Console</p>
                 </div>
               </button>
         </div>

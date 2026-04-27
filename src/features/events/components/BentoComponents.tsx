@@ -10,7 +10,7 @@ import {
   CheckCircle2, AlertCircle,
   LayoutDashboard, X
 } from 'lucide-react'
-import { EventRegistrationForm } from '@/forms/new-events/EventRegistrationForm'
+import { EventRegistrationForm } from './RegisterEventForm'
 
 // Status badge styling helper
 const getStatusStyles = (status: string) => {

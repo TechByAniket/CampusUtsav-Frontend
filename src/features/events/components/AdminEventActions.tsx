@@ -1,6 +1,6 @@
 import { 
   BarChart3, Users, 
-  Settings2
+  Settings2, ClipboardCheck
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -45,6 +45,13 @@ export const AdminEventActions = ({ status }: AdminEventActionsProps) => {
             <Button variant="outline" className="h-10 px-4 gap-2.5 rounded-xl border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 text-slate-600 transition-all group">
               <Users size={14} className="text-slate-400 group-hover:text-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-widest">Registrations</span>
+            </Button>
+          </Link>
+
+          <Link to="attendance">
+            <Button variant="outline" className="h-10 px-4 gap-2.5 rounded-xl border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-200 text-slate-600 transition-all group">
+              <ClipboardCheck size={14} className="text-slate-400 group-hover:text-blue-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Attendance</span>
             </Button>
           </Link>
 

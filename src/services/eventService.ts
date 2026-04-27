@@ -2,6 +2,20 @@ import type { Event, UpcomingEventCardProps } from "@/types/event";
 import axios from "axios";
 import { handleServiceError } from "@/utils/errorUtils";
 
+// ************ GET ALL EVENT REGISTRATIONS BY EVENT ID ************ //
+export const getEventRegistrations = async (eventId: number | string) =>{
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/events/${eventId}/registrations`, {
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("token"),
+      }
+    });
+    return response.data;
+  } catch (error:any) {
+    throw new Error(handleServiceError(error, "Fetching Event Registrations"));    
+  }
+}
+
 
 // ************ GET EVENTS BY COLLEGE ID ************ //
 export const getAllEventsByCollege = async (collegeId: number | string) =>{
@@ -203,4 +217,4 @@ export const generateEventDescriptionAI = async (payload: { prompt: string;
   catch(error:any){
     throw new Error(handleServiceError(error, "AI Synchronization Failed"));
   }
-}
+}

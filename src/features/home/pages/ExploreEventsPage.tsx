@@ -8,8 +8,8 @@ import { Sparkles, AlertCircle, Info } from 'lucide-react';
 import { getAllEventsByCollege } from '@/services/eventService';
 import type { EventSummary } from '@/types/event';
 import type { RootState } from '@/store/store';
-import { EventListCard } from '@/features/events/new-components/EventListCard';
-import { EventFilterBar } from '@/features/events/new-components/EventFilterBar';
+import { EventListCard } from '@/features/events/components/EventListCard';
+import { EventFilterBar } from '@/features/events/components/EventFilterBar';
 
 export const ExploreEventsPage = () => {
   const navigate = useNavigate();
