@@ -11,6 +11,42 @@ import { ClubOverviewHero } from '../../components/ClubOverviewHero';
 
 
 
+const sampleEvents: any[] = [
+  {
+    id: 1,
+    title: "Tech Innovate 2024",
+    eventCategory: "Technology",
+    venue: "Main Auditorium",
+    date: "2024-05-15",
+    startTime: "10:00 AM",
+    endTime: "04:00 PM",
+    posterUrl: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=2070&auto=format&fit=crop",
+    club: { name: "Tech Club" }
+  },
+  {
+    id: 2,
+    title: "Cultural Fest",
+    eventCategory: "Cultural",
+    venue: "Open Grounds",
+    date: "2024-05-20",
+    startTime: "09:00 AM",
+    endTime: "09:00 PM",
+    posterUrl: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2070&auto=format&fit=crop",
+    club: { name: "Cultural Committee" }
+  },
+  {
+    id: 3,
+    title: "Sports Meet",
+    eventCategory: "Sports",
+    venue: "College Stadium",
+    date: "2024-05-25",
+    startTime: "08:00 AM",
+    endTime: "06:00 PM",
+    posterUrl: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop",
+    club: { name: "Sports Club" }
+  }
+];
+
 export const ClubOverview: React.FC = () => {
   return (
     // The main container

@@ -39,6 +39,7 @@ const handleLogin = async (data: LoginProps) => {
       email: response.email,
       profileId: response.profileId,
       collegeId: response.collegeId,
+      collegeName: response.collegeName,
       studentSummary: response.studentSummary
     }));
 
