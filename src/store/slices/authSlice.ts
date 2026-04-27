@@ -19,6 +19,7 @@ interface AuthState {
   email: string | null;
   profileId: number | null;
   collegeId: number | null;
+  collegeName: string | null;
 
   // role-based optional data
   studentSummary: StudentSummary | null;
@@ -49,12 +50,13 @@ const initialState: AuthState = {
   token: localStorage.getItem("token"),
   role: localStorage.getItem("role"),
   email: localStorage.getItem("email"),
-  profileId : localStorage.getItem("profileId")
+  profileId: localStorage.getItem("profileId")
     ? Number(localStorage.getItem("profileId"))
     : null,
   collegeId: localStorage.getItem("collegeId")
     ? Number(localStorage.getItem("collegeId"))
     : null,
+  collegeName: localStorage.getItem("collegeName"),
   studentSummary: localStorage.getItem("studentSummary")
     ? JSON.parse(localStorage.getItem("studentSummary") as string)
     : null,
@@ -78,6 +80,7 @@ const authSlice = createSlice({
         email: string;
         profileId: number;
         collegeId: number;
+        collegeName?: string | null;
         studentSummary?: StudentSummary | null;
       }>
     ) => {
@@ -86,6 +89,7 @@ const authSlice = createSlice({
       state.email = payload.email;
       state.profileId = payload.profileId;
       state.collegeId = payload.collegeId;
+      state.collegeName = payload.collegeName ?? null;
       state.studentSummary = payload.studentSummary ?? null;
 
       persistAuth(state);
@@ -97,6 +101,7 @@ const authSlice = createSlice({
       state.email = null;
       state.profileId = null;
       state.collegeId = null;
+      state.collegeName = null;
       state.studentSummary = null;
 
       persistAuth(state);

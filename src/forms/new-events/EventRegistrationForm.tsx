@@ -49,6 +49,10 @@ export const EventRegistrationForm: React.FC<{
    const curStudentCollegeId = useSelector((state: RootState) => state.auth.collegeId);
 
   /* ================= FORM STATE ================= */
+  const [registrationType, setRegistrationType] = useState<"INDIVIDUAL" | "TEAM">(
+    isTeamEvent ? "TEAM" : "INDIVIDUAL"
+  );
+  const [leaderId, setLeaderId] = useState<number | null>(student?.id || null);
 
   const [formData, setFormData] = useState({
     teamName: "",
@@ -118,7 +122,7 @@ export const EventRegistrationForm: React.FC<{
   /* ================= SUBMIT ================= */
 
   const handleSubmit = async () => {
-    const isTeam = isTeamEvent && teamSize > 1;
+    const isTeam = registrationType === "TEAM";
     
     // Final validation for team formation
     if (isTeam) {
@@ -131,15 +135,18 @@ export const EventRegistrationForm: React.FC<{
          toast.error(`Verification incomplete. Please verify all ${teamSize - 1} team members.`);
          return;
        }
+       if (!leaderId) {
+         toast.error("Please select a team leader.");
+         return;
+       }
     }
 
     // Prepare payload according to backend model
     const registrationPayload = {
-      eventId: Number(eventId),
-      studentId: student?.id,
+      studentId: student?.id, // The person initiating the registration
+      leaderId: isTeam ? leaderId : student?.id,
       teamName: isTeam ? formData.teamName : null,
-      registrationType: isTeam ? "TEAM" : "INDIVIDUAL",
-      extraInfo: "{}", // ready for dynamic content if needed
+      registrationType: registrationType,
       teamMemberIds: isTeam ? Object.values(teamMembersMeta).map(m => m.id) : [],
     };
 
@@ -195,12 +202,49 @@ export const EventRegistrationForm: React.FC<{
       {/* ================= BODY ================= */}
       <div className="px-6 py-6 space-y-6 max-h-[60vh] overflow-y-auto no-scrollbar font-jakarta">
         
+        {/* ===== REGISTRATION TYPE SELECTION ===== */}
+        {isTeamEvent && (
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+               <div className="w-1 h-4 bg-primary rounded-full" />
+               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Registration Mode</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  setRegistrationType("INDIVIDUAL");
+                  setLeaderId(student?.id || null);
+                }}
+                className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                  registrationType === "INDIVIDUAL"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200"
+                }`}
+              >
+                <User size={20} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Individual</span>
+              </button>
+              <button
+                onClick={() => setRegistrationType("TEAM")}
+                className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                  registrationType === "TEAM"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200"
+                }`}
+              >
+                <Users size={20} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Team</span>
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* ===== COORDINATOR BENTO INFO ===== */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 mb-1">
              <div className="w-1 h-4 bg-indigo-600 rounded-full" />
              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Primary Candidate Information</h3>
-             {isTeamEvent && teamSize > 1 && (
+             {registrationType === "TEAM" && (
                <div className="px-3 py-1.5 rounded-full border flex items-center gap-2 bg-amber-50/50 border-amber-500/20 text-amber-600">
                  <Users size={12} />
                  <span className="text-[10px] font-black uppercase tracking-widest leading-none">
@@ -220,7 +264,7 @@ export const EventRegistrationForm: React.FC<{
         </section>
 
         {/* ===== TEAM ARCHITECTURE ===== */}
-        {isTeamEvent && teamSize > 1 && (
+        {registrationType === "TEAM" && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center gap-2 mb-1">
                <div className="w-1 h-4 bg-amber-500 rounded-full" />
@@ -250,7 +294,7 @@ export const EventRegistrationForm: React.FC<{
                           <Users size={14} />
                         </div>
                         <input
-                          placeholder={`Member ${idx + 2} College/University UID (e.g., 2023PE0381)`}
+                          placeholder={`Member ${idx + 2} College/University UID`}
                           value={formData.teamMembers[idx] || ""}
                           onChange={(e) => {
                             const updated = [...formData.teamMembers];
@@ -297,6 +341,62 @@ export const EventRegistrationForm: React.FC<{
                   </div>
                 ))}
               </div>
+
+              {/* Leader Selection Section */}
+              {Object.keys(teamMembersMeta).length === teamSize - 1 && (
+                <div className="space-y-3 pt-2">
+                   <div className="flex items-center gap-2 mb-1">
+                      <div className="w-1 h-4 bg-emerald-500 rounded-full" />
+                      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Command & Control (Select Leader)</h3>
+                   </div>
+                   <div className="grid grid-cols-1 gap-2">
+                      {/* Current User Option */}
+                      <button
+                        onClick={() => setLeaderId(student?.id || null)}
+                        className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                          leaderId === student?.id
+                            ? "border-emerald-500 bg-emerald-50"
+                            : "border-slate-100 bg-white hover:border-slate-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${leaderId === student?.id ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                            <ShieldCheck size={16} />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-[10px] font-black text-slate-900 uppercase">You (Coordinator)</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{student?.name}</p>
+                          </div>
+                        </div>
+                        {leaderId === student?.id && <CheckCircle2 size={16} className="text-emerald-500" />}
+                      </button>
+
+                      {/* Verified Members Options */}
+                      {Object.values(teamMembersMeta).map((member: any) => (
+                        <button
+                          key={member.id}
+                          onClick={() => setLeaderId(member.id)}
+                          className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                            leaderId === member.id
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-slate-100 bg-white hover:border-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${leaderId === member.id ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                              <User size={16} />
+                            </div>
+                            <div className="text-left">
+                              <p className="text-[10px] font-black text-slate-900 uppercase">Team Member</p>
+                              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{member.name}</p>
+                            </div>
+                          </div>
+                          {leaderId === member.id && <CheckCircle2 size={16} className="text-emerald-500" />}
+                        </button>
+                      ))}
+                   </div>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -312,7 +412,7 @@ export const EventRegistrationForm: React.FC<{
         </button>
         
         <button
-          disabled={isSubmitting}
+          disabled={isSubmitting || (registrationType === "TEAM" && !leaderId)}
           onClick={handleSubmit}
           className="px-8 py-3.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center gap-3 hover:bg-indigo-600 disabled:bg-slate-100 disabled:text-slate-300 transition-all shadow-lg active:scale-95 group"
         >
