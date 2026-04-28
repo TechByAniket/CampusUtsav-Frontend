@@ -23,7 +23,7 @@ import { ExploreEventsPage } from './features/home/pages/ExploreEventsPage'
 import ScrollToTop from './components/ui/ScrollToTop'
 import { DefaultLayout } from './layouts/DefaultLayout'
 import { PublicEventDetailsPage } from './features/events/pages/PublicEventDetailsPage'
-import { EventAttendancePage } from './features/events/pages/EventAttendancePage'
+import { AttendancePage } from './features/attendance/pages/AttendancePage'
 import { EventRegistrationsPage } from './features/events/pages/EventRegistrationsPage'
 import { Staff } from './features/college/pages/college-dashboard/Staff'
 import { StaffOverview } from './features/staff/pages/StaffOverview'
@@ -71,7 +71,7 @@ function App() {
           <Route path="staff" element={<Staff/>} />
           <Route path="events/:id" element={<AdminEventDetailsPage />} />
           <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
-          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
+          <Route path="events/:id/attendance" element={<AttendancePage />} />
           <Route path="clubs" element={<Clubs />} />
           <Route path="clubs/:clubId" element={<ClubDetailsPage />} />
           <Route path="students" element={<Students />} />
@@ -86,7 +86,7 @@ function App() {
           <Route path="events" element={<ClubEvents />} />
           <Route path="events/:id" element={<AdminEventDetailsPage />} />
           <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
-          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
+          <Route path="events/:id/attendance" element={<AttendancePage />} />
           <Route path="inbox" element={<ClubInbox />} />
         </Route>
       </Route>
@@ -100,7 +100,7 @@ function App() {
           <Route path="events" element={<StaffEvents />} />
           <Route path="events/:id" element={<AdminEventDetailsPage />} />
           <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
-          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
+          <Route path="events/:id/attendance" element={<AttendancePage />} />
           <Route path="members" element={<StaffMembersTab />} />
           <Route path="club" element={<StaffClub />} />
         </Route>
