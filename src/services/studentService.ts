@@ -24,6 +24,20 @@ export const registerStudent = async (data: any) => {
   }
 }
 
+// *********** GET Student's registration details *********** //
+export const getStudentRegistrations = async () => {
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/me/registrations`, {
+      headers:{
+        Authorization : `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(handleServiceError(error, "Failed to fetch your registrations"));
+  }
+}
+
 // *********** GET Student's profile details *********** //
 export const getMyStudentProfileDetails = async () => {
   try {

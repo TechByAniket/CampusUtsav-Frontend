@@ -138,6 +138,24 @@ export const Profile = () => {
               </div>
             ))}
 
+            {/* Student Specific Registrations Tab */}
+            {role === 'ROLE_STUDENT' && (
+              <DropdownMenuItem
+                onClick={() => navigate('/users/registrations')}
+                className="
+                  flex items-center gap-3 rounded-[1.25rem] px-4 py-3 cursor-pointer
+                  text-[10px] font-black uppercase tracking-[0.15em]
+                  text-slate-500 transition-all duration-300
+                  hover:bg-indigo-600 hover:text-white hover:translate-x-1
+                  focus:bg-indigo-600 focus:text-white
+                  group/item
+                "
+              >
+                <Sparkles className="h-3.5 w-3.5 opacity-40 group-hover/item:opacity-100 transition-opacity" />
+                <span>My Registrations</span>
+              </DropdownMenuItem>
+            )}
+
             {/* Logout Protocol */}
             <DropdownMenuItem
               onClick={() => handleAction({ action: "logout" })}

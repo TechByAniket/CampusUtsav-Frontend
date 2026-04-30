@@ -23,7 +23,7 @@ import { ExploreEventsPage } from './features/home/pages/ExploreEventsPage'
 import ScrollToTop from './components/ui/ScrollToTop'
 import { DefaultLayout } from './layouts/DefaultLayout'
 import { PublicEventDetailsPage } from './features/events/pages/PublicEventDetailsPage'
-import { EventAttendancePage } from './features/events/pages/EventAttendancePage'
+import { AttendancePage } from './features/attendance/pages/AttendancePage'
 import { EventRegistrationsPage } from './features/events/pages/EventRegistrationsPage'
 import { Staff } from './features/college/pages/college-dashboard/Staff'
 import { StaffOverview } from './features/staff/pages/StaffOverview'
@@ -36,6 +36,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import NotFound from './components/error_pages/NotFound'
 import AccessDenied from './components/error_pages/AccessDenied'
 import ProfilePage from './features/auth/pages/ProfilePage'
+import MyRegistrationsPage from './features/student/pages/MyRegistrationsPage'
 // import { De } from 'zod/v4/locales'
 
 
@@ -55,6 +56,9 @@ function App() {
         <Route path="explore-events" element={<ExploreEventsPage />} />
         <Route path="explore-events/events/:id" element={<PublicEventDetailsPage />} />
         <Route path="users/profile" element={<ProfilePage />} />
+        <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
+          <Route path="users/registrations" element={<MyRegistrationsPage />} />
+        </Route>
         {/* Public 404 / Access Denied */}
         <Route path="access-denied" element={<AccessDenied />} />
         {/* The asterisk '*' matches anything not defined above */}
@@ -71,7 +75,7 @@ function App() {
           <Route path="staff" element={<Staff/>} />
           <Route path="events/:id" element={<AdminEventDetailsPage />} />
           <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
-          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
+          <Route path="events/:id/attendance" element={<AttendancePage />} />
           <Route path="clubs" element={<Clubs />} />
           <Route path="clubs/:clubId" element={<ClubDetailsPage />} />
           <Route path="students" element={<Students />} />
@@ -86,7 +90,7 @@ function App() {
           <Route path="events" element={<ClubEvents />} />
           <Route path="events/:id" element={<AdminEventDetailsPage />} />
           <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
-          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
+          <Route path="events/:id/attendance" element={<AttendancePage />} />
           <Route path="inbox" element={<ClubInbox />} />
         </Route>
       </Route>
@@ -100,7 +104,7 @@ function App() {
           <Route path="events" element={<StaffEvents />} />
           <Route path="events/:id" element={<AdminEventDetailsPage />} />
           <Route path="events/:id/registrations" element={<EventRegistrationsPage />} />
-          <Route path="events/:id/attendance" element={<EventAttendancePage />} />
+          <Route path="events/:id/attendance" element={<AttendancePage />} />
           <Route path="members" element={<StaffMembersTab />} />
           <Route path="club" element={<StaffClub />} />
         </Route>
