@@ -18,8 +18,9 @@ export const ExploreEventsPage = () => {
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("ALL");
-  const [activeStatus, setActiveStatus] = useState("ALL");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -43,12 +44,13 @@ export const ExploreEventsPage = () => {
                            e.clubNameShortForm.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            e.venue.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesCategory = activeCategory === "ALL" || e.eventCategory === activeCategory;
-      const matchesStatus = activeStatus === "ALL" || e.status === activeStatus;
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(e.eventCategory);
+      const matchesClub = selectedClubs.length === 0 || selectedClubs.includes(e.clubNameShortForm);
+      const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(e.status);
 
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory && matchesClub && matchesStatus;
     });
-  }, [events, searchQuery, activeCategory, activeStatus]);
+  }, [events, searchQuery, selectedCategories, selectedClubs, selectedStatus]);
 
   if (!collegeId) {
     return (
@@ -108,10 +110,13 @@ export const ExploreEventsPage = () => {
         <EventFilterBar 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          activeStatus={activeStatus}
-          onStatusChange={setActiveStatus}
+          selectedCategories={selectedCategories}
+          onCategoriesChange={setSelectedCategories}
+          selectedClubs={selectedClubs}
+          onClubsChange={setSelectedClubs}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+          collegeId={collegeId}
         />
 
         {/* Discovery Grid */}
@@ -143,7 +148,12 @@ export const ExploreEventsPage = () => {
                 <p className="text-slate-400 font-medium max-w-sm mx-auto text-sm uppercase tracking-widest leading-relaxed">No events match your current search or filter criteria. <br />Try adjusting your settings.</p>
               </div>
               <button 
-                onClick={() => { setSearchQuery(""); setActiveCategory("ALL"); setActiveStatus("ALL"); }}
+                onClick={() => { 
+                  setSearchQuery(""); 
+                  setSelectedCategories([]); 
+                  setSelectedClubs([]); 
+                  setSelectedStatus([]); 
+                }}
                 className="px-10 py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-xl shadow-slate-100"
               >
                 Clear all filters

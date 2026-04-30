@@ -14,12 +14,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { accountMenuItems } from "@/services/userService";
-import { LogOut, ChevronDown, ShieldCheck, Sparkles } from "lucide-react";
+import { 
+  LogOut, 
+  ChevronDown, 
+  ShieldCheck, 
+  Sparkles, 
+  Menu, 
+  Home, 
+  Compass, 
+  Info, 
+  Code 
+} from "lucide-react";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 export const Profile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   
+  const navLinks = [
+    { label: "Home", path: "/", icon: Home },
+    { label: "Explore Events", path: "/explore-events", icon: Compass },
+    { label: "About Us", path: "/about", icon: Info },
+    { label: "Developers", path: "/developers", icon: Code },
+  ];
+
   // Redux Auth Intel
   const { email, role, studentSummary } = useSelector((state: RootState) => state.auth);
 
@@ -89,51 +107,56 @@ export const Profile = () => {
           align="end"
           sideOffset={15}
           className="
-            w-72 rounded-[2rem] border border-slate-200/60
-            bg-white/95 backdrop-blur-xl p-2.5 shadow-2xl shadow-indigo-100/50
-            animate-in fade-in zoom-in-95 duration-200 font-jakarta
+            w-64 rounded-[2rem] border border-slate-200/50
+            bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)]
+            p-2 animate-in fade-in zoom-in-95 duration-200 font-jakarta overflow-hidden
           "
         >
-          {/* Dashboard Header Capsule */}
-          <div className="px-5 py-5 mb-3 bg-slate-50/50 rounded-[1.5rem] border border-slate-100 overflow-hidden relative group">
-            <div className="absolute -top-6 -right-6 w-16 h-16 bg-indigo-50/50 rounded-full blur-2xl group-hover:bg-indigo-100/60 transition-colors" />
-            
-            <div className="relative z-10">            
-               <p className="text-sm font-black text-slate-900 truncate leading-tight">
-                  {email}
-               </p>
-               
-               {studentSummary?.rollNo && (
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-200/40">
-                     <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">
-                        ID: <span className="text-slate-900">{studentSummary.id}</span>
-                     </p>
-                  </div>
-               )}
-            </div>
+          {/* --- MOBILE NAVIGATION (Hidden on Desktop) --- */}
+          <div className="md:hidden space-y-1 mb-2">
+            <p className="px-4 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">Navigation</p>
+            {navLinks.map((link) => (
+              <DropdownMenuItem
+                key={link.label}
+                onClick={() => navigate(link.path)}
+                className="
+                  flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer
+                  text-[10px] font-black uppercase tracking-wider
+                  text-indigo-600 bg-indigo-50/50 transition-all duration-300
+                  hover:bg-indigo-600 hover:text-white
+                  focus:bg-indigo-600 focus:text-white
+                "
+              >
+                <link.icon className="h-3.5 w-3.5" />
+                <span>{link.label}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator className="my-2 bg-slate-50" />
+            <p className="px-4 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">Account</p>
           </div>
 
           <div className="space-y-1">
+
             {accountMenuItems.map((item, index) => (
               <div key={item.label}>
                 <DropdownMenuItem
                   onClick={() => handleAction(item)}
                   className="
-                    flex items-center gap-3 rounded-[1.25rem] px-4 py-3 cursor-pointer
-                    text-[10px] font-black uppercase tracking-[0.15em]
-                    text-slate-500 transition-all duration-300
-                    hover:bg-indigo-600 hover:text-white hover:translate-x-1
+                    flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer
+                    text-[10px] font-black uppercase tracking-wider
+                    text-slate-600 bg-slate-50/50 transition-all duration-300
+                    hover:bg-indigo-600 hover:text-white
                     focus:bg-indigo-600 focus:text-white
                     group/item
                   "
                 >
-                  <item.icon className="h-3.5 w-3.5 opacity-40 group-hover/item:opacity-100 transition-opacity" />
+                  <item.icon className="h-3.5 w-3.5 text-slate-400 group-hover/item:text-white transition-colors" />
                   <span>{item.label}</span>
                 </DropdownMenuItem>
 
-                {/* Intelligent Separator */}
+                {/* Separator before Log Out */}
                 {index === accountMenuItems.length - 2 && (
-                  <div className="h-px bg-slate-100 my-2 mx-4" />
+                  <div className="h-px bg-slate-50 my-1.5 mx-3" />
                 )}
               </div>
             ))}
@@ -143,30 +166,29 @@ export const Profile = () => {
               <DropdownMenuItem
                 onClick={() => navigate('/users/registrations')}
                 className="
-                  flex items-center gap-3 rounded-[1.25rem] px-4 py-3 cursor-pointer
-                  text-[10px] font-black uppercase tracking-[0.15em]
-                  text-slate-500 transition-all duration-300
-                  hover:bg-indigo-600 hover:text-white hover:translate-x-1
-                  focus:bg-indigo-600 focus:text-white
-                  group/item
+                  flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer
+                  text-[10px] font-black uppercase tracking-wider
+                  text-orange-600 bg-orange-50/50 transition-all duration-300
+                  hover:bg-orange-600 hover:text-white
+                  focus:bg-orange-600 focus:text-white
                 "
               >
-                <Sparkles className="h-3.5 w-3.5 opacity-40 group-hover/item:opacity-100 transition-opacity" />
+                <Sparkles className="h-3.5 w-3.5" />
                 <span>My Registrations</span>
               </DropdownMenuItem>
             )}
 
-            {/* Logout Protocol */}
+            {/* --- SIGN OUT --- */}
             <DropdownMenuItem
               onClick={() => handleAction({ action: "logout" })}
               className="
-                mt-2 flex items-center gap-3 rounded-[1.25rem] px-4 py-3.5
-                cursor-pointer text-[10px] font-black uppercase tracking-[0.2em]
-                text-rose-500 hover:bg-rose-50 hover:text-rose-600
+                flex items-center gap-3 rounded-2xl px-4 py-3
+                cursor-pointer text-[10px] font-black uppercase tracking-widest
+                text-rose-600 bg-rose-50/50 hover:bg-rose-600 hover:text-white
                 transition-all duration-300 group/logout
               "
             >
-              <LogOut className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+              <LogOut className="h-3.5 w-3.5 group-hover/logout:scale-110 transition-transform" />
               <span>Sign Out</span>
             </DropdownMenuItem>
           </div>
