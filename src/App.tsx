@@ -36,6 +36,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import NotFound from './components/error_pages/NotFound'
 import AccessDenied from './components/error_pages/AccessDenied'
 import ProfilePage from './features/auth/pages/ProfilePage'
+import MyRegistrationsPage from './features/student/pages/MyRegistrationsPage'
 // import { De } from 'zod/v4/locales'
 
 
@@ -55,6 +56,9 @@ function App() {
         <Route path="explore-events" element={<ExploreEventsPage />} />
         <Route path="explore-events/events/:id" element={<PublicEventDetailsPage />} />
         <Route path="users/profile" element={<ProfilePage />} />
+        <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
+          <Route path="users/registrations" element={<MyRegistrationsPage />} />
+        </Route>
         {/* Public 404 / Access Denied */}
         <Route path="access-denied" element={<AccessDenied />} />
         {/* The asterisk '*' matches anything not defined above */}

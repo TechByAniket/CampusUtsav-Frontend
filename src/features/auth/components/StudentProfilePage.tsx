@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Building2, 
-  AtSign, 
-  Phone, 
-  Calendar, 
-  Award, 
-  BookOpen, 
-  Hash, 
+import {
+  Building2,
+  AtSign,
+  Phone,
+  Calendar,
+  Award,
+  BookOpen,
+  Hash,
   Layers,
   Sparkles,
   Verified,
@@ -80,10 +80,10 @@ const StudentProfilePage = () => {
         }
       `}</style>
 
-      <main className="max-w-5xl mx-auto space-y-4 font-jakarta">
+      <main className="max-w-6xl mx-auto space-y-4 font-jakarta">
 
         {/* ================= LIGHT THEMED HERO ================= */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="visible-border tile-compact flex flex-col md:flex-row md:items-center justify-between gap-6"
@@ -97,7 +97,7 @@ const StudentProfilePage = () => {
                 <Verified size={10} color="white" />
               </div>
             </div>
-            
+
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
@@ -114,16 +114,16 @@ const StudentProfilePage = () => {
           </div>
 
           <div className="flex flex-wrap items-start gap-8 md:pr-4">
-             <HeroInfo label="UID" value={profileData.identificationNumber} />
-             <HeroInfo label="Phone" value={profileData.phone} verified={profileData.phoneVerified} />
-             <HeroInfo label="Joined" value={new Date(profileData.createdAt).toLocaleDateString()} />
+            <HeroInfo label="UID" value={profileData.identificationNumber} />
+            <HeroInfo label="Phone" value={profileData.phone} verified={profileData.phoneVerified} />
+            <HeroInfo label="Joined" value={new Date(profileData.createdAt).toLocaleDateString()} />
           </div>
         </motion.div>
 
         {/* ================= HIGH DENSITY GRID ================= */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          
-          <Tile 
+
+          <Tile
             span="col-span-2"
             icon={<Building2 size={16} />}
             label="College"
@@ -131,44 +131,44 @@ const StudentProfilePage = () => {
             color="indigo"
           />
 
-          <Tile 
+          <Tile
             icon={<BookOpen size={16} />}
             label="Branch"
             value={profileData.branch}
             color="blue"
           />
 
-          <Tile 
-             icon={<Hash size={16} />}
-             label="Roll No"
-             value={profileData.rollNo}
-             sub={`Division ${profileData.division}`}
-             color="amber"
+          <Tile
+            icon={<Hash size={16} />}
+            label="Roll No"
+            value={profileData.rollNo}
+            sub={`Division ${profileData.division}`}
+            color="amber"
           />
 
-          <Tile 
+          <Tile
             icon={<Layers size={16} />}
             label="Year"
             value={`${academicYear} Year`}
             color="violet"
           />
 
-          <Tile 
+          <Tile
             icon={<IdCard size={16} />}
             label="College ID"
             value={profileData.collegeId}
             color="slate"
           />
 
-          <Tile 
+          <Tile
             span="col-span-2"
             icon={<Sparkles size={16} />}
             label="Interests"
             value={profileData.interests || "General Interests"}
             color="emerald"
           />
-          
-          <Tile 
+
+          <Tile
             icon={<Mail size={16} />}
             label="Official Identity"
             value={profileData.email}
@@ -176,8 +176,8 @@ const StudentProfilePage = () => {
             color="rose"
             span="col-span-2"
           />
-          
-          <Tile 
+
+          <Tile
             icon={<Phone size={16} />}
             label="Direct Contact"
             value={profileData.phone}
@@ -185,14 +185,14 @@ const StudentProfilePage = () => {
             span="col-span-2"
           />
 
-          <Tile 
+          <Tile
             icon={<Calendar size={16} />}
             label="Admission"
             value={profileData.admissionYear}
             color="orange"
           />
 
-          <Tile 
+          <Tile
             icon={<Award size={16} />}
             label="Graduation"
             value={profileData.graduationYear}
@@ -202,10 +202,10 @@ const StudentProfilePage = () => {
       </main>
 
       <footer className="mt-10 py-6 border-t border-slate-200">
-         <div className="max-w-5xl mx-auto flex items-center justify-between opacity-30">
-            <p className="text-[8px] font-black uppercase tracking-widest text-slate-500">CampusUtsav</p>
-            <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">© 2026 Campus Utsav Network</p>
-         </div>
+        <div className="max-w-5xl mx-auto flex items-center justify-between opacity-30">
+          <p className="text-[8px] font-black uppercase tracking-widest text-slate-500">CampusUtsav</p>
+          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">© 2026 Campus Utsav Network</p>
+        </div>
       </footer>
     </div>
   );
@@ -216,8 +216,8 @@ const StudentProfilePage = () => {
 const HeroInfo = ({ label, value, verified = true }: any) => (
   <div className="flex flex-col">
     <div className="flex items-center gap-1.5 mb-1">
-       <div className={`w-1 h-1 rounded-full ${verified ? 'bg-emerald-500' : 'bg-slate-300'} shrink-0`} />
-       <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+      <div className={`w-1 h-1 rounded-full ${verified ? 'bg-emerald-500' : 'bg-slate-300'} shrink-0`} />
+      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
     </div>
     <p className="text-xs font-black text-slate-800 ml-2.5 leading-tight">{value || "---"}</p>
   </div>
@@ -225,21 +225,21 @@ const HeroInfo = ({ label, value, verified = true }: any) => (
 
 const Tile = ({ icon, label, value, sub, color, span, verified }: any) => (
   <div className={`visible-border tile-compact flex flex-col gap-3 ${span}`}>
-     <div className="flex items-center justify-between">
-        <div className={`w-8 h-8 rounded-xl bg-${color}-50 text-${color}-600 flex items-center justify-center border border-${color}-100/50 shadow-sm shrink-0`}>
-           {icon}
-        </div>
-        {verified !== undefined && (
-           <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded-full border ${verified ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
-              {verified ? "Verified" : "Pending"}
-           </span>
-        )}
-     </div>
-     <div className="min-w-0">
-        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</p>
-        <p className="text-sm font-extrabold text-slate-800 truncate leading-tight uppercase font-jakarta">{value || "---"}</p>
-        {sub && <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase leading-none">{sub}</p>}
-     </div>
+    <div className="flex items-center justify-between">
+      <div className={`w-8 h-8 rounded-xl bg-${color}-50 text-${color}-600 flex items-center justify-center border border-${color}-100/50 shadow-sm shrink-0`}>
+        {icon}
+      </div>
+      {verified !== undefined && (
+        <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded-full border ${verified ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+          {verified ? "Verified" : "Pending"}
+        </span>
+      )}
+    </div>
+    <div className="min-w-0">
+      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</p>
+      <p className="text-sm font-extrabold text-slate-800 truncate leading-tight uppercase font-jakarta">{value || "---"}</p>
+      {sub && <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase leading-none">{sub}</p>}
+    </div>
   </div>
 );
 

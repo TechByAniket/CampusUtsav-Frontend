@@ -103,11 +103,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ attendees, loa
   }, [attendees, availableBranches]);
 
   const getYearLabel = (year: number) => {
-    if (year === 1) return 'FY';
-    if (year === 2) return 'SY';
-    if (year === 3) return 'TY';
-    if (year === 4) return 'FINAL';
-    return year.toString();
+    const mapping: Record<number, string> = { 1: 'FY', 2: 'SY', 3: 'TY', 4: 'FINAL' };
+    return mapping[year] || year.toString();
   };
 
   const filteredData = useMemo(() => {
@@ -134,9 +131,9 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ attendees, loa
 
   if (loading) {
     return (
-      <div className="bg-white rounded-[2rem] border border-slate-200 p-20 text-center shadow-sm">
+      <div className="bg-white rounded-[2.5rem] border border-slate-200 p-20 text-center shadow-sm">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Fetching attendance records...</p>
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest text-center">Fetching attendance records...</p>
       </div>
     );
   }
@@ -144,7 +141,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ attendees, loa
   return (
     <div className="w-full font-sans">
       {/* --- HEADER --- */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-slate-900 uppercase tracking-tight flex items-center gap-3">
             Attendance List 
@@ -156,12 +153,12 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ attendees, loa
         </div>
         
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <div className="relative group flex-1 md:flex-none">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
             <input 
                 type="text" 
                 placeholder="Search students..." 
-                className="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none w-full md:w-64 font-medium transition-all focus:border-indigo-300 shadow-sm" 
+                className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm focus:outline-none w-full md:w-64 font-medium transition-all focus:border-indigo-300 shadow-sm" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} 
             />
@@ -187,10 +184,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ attendees, loa
         </div>
       </div>
 
-      {/* --- TABLE AREA --- */}
+      {/* --- CONTENT AREA --- */}
       <div className="min-h-[400px]">
         {filteredData.length === 0 ? (
-          <div className="bg-white rounded-[2rem] border border-slate-200 p-20 text-center shadow-sm">
+          <div className="bg-white rounded-[2.5rem] border border-slate-200 p-20 text-center shadow-sm">
             <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300">
               <Users size={32} />
             </div>
@@ -198,87 +195,97 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ attendees, loa
           </div>
         ) : (
           <>
-            {/* MOBILE VIEW */}
+            {/* MOBILE VIEW (Cards) */}
             <div className="grid grid-cols-1 gap-4 md:hidden">
               {filteredData.map((s) => (
-                <div key={s.studentId} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-bold text-slate-800 uppercase text-sm leading-tight">{s.name}</h3>
-                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">{s.identificationNumber}</p>
+                <div key={s.studentId} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm transition-transform active:scale-[0.98]">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-indigo-500 border border-slate-100">
+                        <Users size={16} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-800 uppercase text-sm leading-tight">{s.name}</h3>
+                        <p className="text-[10px] text-slate-400 font-mono font-bold mt-0.5">{s.identificationNumber}</p>
+                      </div>
                     </div>
-                    <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase ${
-                      s.present ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-50 text-slate-400 border border-slate-100'
+                    <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                      s.present ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'
                     }`}>
                       {s.present ? 'Present' : 'Absent'}
-                    </div>
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-tight">
-                    <GraduationCap size={12} className="text-indigo-500" /> {s.branch} • {s.div} • Roll {s.rollNo}
-                  </div>
-                  {s.markedAt && (
-                    <div className="mt-3 flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase">
-                      <Clock size={10} /> Marked at: {new Date(s.markedAt).toLocaleTimeString()}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                      {s.branch}-{getYearLabel(s.year)}-{s.div}-{s.rollNo}
                     </div>
-                  )}
+                    {s.markedAt && (
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                        <Clock size={12} className="text-indigo-400" /> {new Date(s.markedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* DESKTOP VIEW */}
-            <div className="hidden md:block bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-xl shadow-slate-200/40">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-slate-900 border-b border-slate-800">
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Participant</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Academic Info</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Status</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100 text-left">Marked At</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredData.map((s) => (
-                    <tr key={s.studentId} className="hover:bg-indigo-50/30 transition-colors group">
-                      <td className="px-6 py-5">
-                        <div className="font-bold text-slate-800 uppercase text-sm">{s.name}</div>
-                        <div className="text-[11px] text-slate-400 font-mono font-bold mt-0.5">{s.identificationNumber}</div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                           <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-md">
-                             {getYearLabel(s.year)}
-                           </span>
-                           <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">{s.branch} • {s.div}</span>
-                        </div>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Roll No: {s.rollNo}</div>
-                      </td>
-                      <td className="px-6 py-5">
-                        {s.present ? (
-                          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
-                            <CheckCircle2 size={14} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Present</span>
-                          </div>
-                        ) : (
-                          <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 text-slate-400 rounded-full border border-slate-100">
-                            <XCircle size={14} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Absent</span>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-5">
-                        {s.markedAt ? (
-                          <div className="flex items-center gap-2 text-slate-500 font-bold text-[11px]">
-                             <Clock size={14} className="text-indigo-400" />
-                             {new Date(s.markedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                          </div>
-                        ) : (
-                          <span className="text-slate-300 font-black text-[10px] uppercase tracking-widest">---</span>
-                        )}
-                      </td>
+            {/* DESKTOP VIEW (Table) */}
+            <div className="hidden md:block bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50">
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 text-left">
+                      <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Identity Profile</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Identification</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Academic Info</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Status</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-100">Marked At</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredData.map((s) => (
+                      <tr key={s.studentId} className="hover:bg-indigo-50/40 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-slate-800 uppercase text-sm truncate max-w-[200px]">
+                            {s.name}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <div className="text-[12px] text-slate-400 font-mono font-bold leading-none">
+                            ID: {s.identificationNumber}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <div className="text-[11px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-3 py-1 rounded-full w-fit whitespace-nowrap">
+                            {s.branch}-{getYearLabel(s.year)}-{s.div}-{s.rollNo}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                            s.present ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'
+                          }`}>
+                            {s.present ? 'Present' : 'Absent'}
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          {s.markedAt ? (
+                            <div className="text-[12px] font-bold text-slate-500 uppercase tracking-tight flex items-center gap-2">
+                              <Clock size={14} className="text-indigo-400" />
+                              {new Date(s.markedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </div>
+                          ) : (
+                            <span className="text-slate-300 font-black text-[11px] uppercase tracking-widest">---</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         )}

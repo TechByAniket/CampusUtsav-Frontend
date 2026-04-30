@@ -28,6 +28,7 @@ import { getEventDetailsByEventId } from '@/services/eventService';
 import { getAllBranchesOfCollege } from '@/services/collegeService';
 import type { AdminEventDetail } from '@/types/event';
 import { AttendanceTable, type Attendee } from '../components/AttendanceTable';
+import { AttendanceActions } from '../components/AttendanceActions';
 
 export const AttendancePage: React.FC = () => {
   const { id } = useParams<{ id: string }>() as { id: string };
@@ -84,7 +85,14 @@ export const AttendancePage: React.FC = () => {
       } catch (statusError: any) {
         console.warn("Status fetch failed:", statusError.message);
         setAttendanceActive(false);
-        setErrorNotice(statusError.message);
+        // Clean up message
+        const rawMsg = statusError.message || "";
+        const cleanMsg = rawMsg.includes("Something went wrong:") 
+          ? rawMsg.split("Something went wrong:")[1].trim()
+          : rawMsg.includes("Failed to fetch attendance status:")
+          ? rawMsg.split("Failed to fetch attendance status:")[1].trim()
+          : rawMsg;
+        setErrorNotice(cleanMsg);
       }
 
       // Fetch branches for filters
@@ -225,65 +233,17 @@ export const AttendancePage: React.FC = () => {
                 </div>
 
                 {/* Action Buttons Row */}
-                <div className="flex flex-wrap items-center gap-3 mt-8 pt-6 border-t border-slate-50">
-                  {errorNotice && (
-                    <div className="w-full flex items-center gap-3 px-5 py-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 mb-2">
-                      <AlertCircle size={18} />
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">Administrative Notice</span>
-                        <span className="text-xs font-bold">{errorNotice}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {!attendanceActive ? (
-                    <Button
-                      onClick={handleStart}
-                      disabled={!isClubAdmin}
-                      className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[10px] uppercase tracking-widest gap-2.5 shadow-xl shadow-slate-200 transition-all active:scale-95 disabled:opacity-50"
-                    >
-                      <Play size={14} fill="currentColor" /> Start Attendance
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Button
-                        onClick={handleStop}
-                        disabled={!isClubAdmin}
-                        variant="outline"
-                        className="h-12 px-8 rounded-xl border-rose-200 bg-white hover:bg-rose-50 hover:border-rose-300 text-rose-600 font-black text-[10px] uppercase tracking-widest gap-2.5 shadow-sm transition-all active:scale-95"
-                      >
-                        <Square size={14} fill="currentColor" /> Stop Attendance
-                      </Button>
-                      <Button
-                        onClick={() => setShowQrModal(true)}
-                        className="h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest gap-2.5 shadow-lg shadow-indigo-100 transition-all active:scale-95"
-                      >
-                        <QrCode size={14} /> Display QR
-                      </Button>
-                      <div className="hidden sm:flex items-center gap-3 px-4 h-12 bg-slate-50 border border-slate-100 rounded-xl">
-                        <div className="flex flex-col">
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Rotate</span>
-                          <span className="text-[11px] font-black text-slate-900 tabular-nums">{timeLeft}s</span>
-                        </div>
-                        <div className="w-10 h-1 bg-slate-200 rounded-full overflow-hidden">
-                          <motion.div
-                            className="h-full bg-indigo-500"
-                            animate={{ width: `${(timeLeft / 30) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button
-                    onClick={() => fetchData(true)}
-                    disabled={loading}
-                    variant="outline"
-                    className="h-12 rounded-xl border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-black uppercase tracking-widest gap-2.5 px-6 shadow-sm"
-                  >
-                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Sync
-                  </Button>
-                </div>
+                <AttendanceActions 
+                  isClubAdmin={isClubAdmin}
+                  attendanceActive={attendanceActive}
+                  loading={loading}
+                  errorNotice={errorNotice}
+                  timeLeft={timeLeft}
+                  onStart={handleStart}
+                  onStop={handleStop}
+                  onDisplayQr={() => setShowQrModal(true)}
+                  onSync={() => fetchData(true)}
+                />
               </div>
             </div>
 

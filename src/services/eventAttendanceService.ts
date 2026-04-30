@@ -72,9 +72,9 @@ export const getAttendanceToken = async (eventId: string | number) => {
 }
 
 // ********* MARK ATTENDANCE ********** //
-export const markAttendance = async (eventId: string | number) => {
+export const markAttendance = async (attendanceToken: string) => {
   try {
-    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/events/${eventId}/attendance/scan`, {}, {
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/events/attendance/scan`, { attendanceToken }, {
       headers:{
         Authorization : `Bearer ${localStorage.getItem("token")}`
       }
