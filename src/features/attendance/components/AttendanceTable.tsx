@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Users, GraduationCap, Clock, CheckCircle2, XCircle, ChevronDown, Check
+  Search, Users, GraduationCap, Clock, ChevronDown, Check
 } from 'lucide-react';
 
 export interface Attendee {

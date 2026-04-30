@@ -41,11 +41,6 @@ export const MyRegistrationsList = ({ registrations, onRefresh }: MyRegistration
     }
   };
 
-  const handleMarkAttendance = async (eventId: number) => {
-     // This is the direct manual marking flow (fallback or legacy)
-     // User specifically asked for QR flow now
-     toast.info("Please scan the session QR code");
-  };
 
   if (registrations.length === 0) {
     return (
