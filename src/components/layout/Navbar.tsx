@@ -29,24 +29,33 @@ export const Navbar: React.FC = () => {
           <li>
             <Link to="/explore-events" className="hover:text-orange-600 transition-colors duration-200">Explore Events</Link>
           </li>
+          {token && (useSelector((state: RootState) => state.auth.role) === 'ROLE_STUDENT') && (
+            <li>
+              <Link to="/users/registrations" className="hover:text-orange-600 transition-colors duration-200">My Registrations</Link>
+            </li>
+          )}
           <li>
             <Link to="/about" className="hover:text-orange-600 transition-colors duration-200">About Us</Link>
-          </li>
-          <li>
-            <Link to="/developers" className="hover:text-orange-600 transition-colors duration-200" text-red-500>Developers</Link>
           </li>
         </ul>
 
         {/* Action Area: Profile if logged in, Login if not */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {token ? (
             <Profile />
           ) : (
-            <Link to={'/auth/sign-in'}>
-              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-black uppercase text-[10px] tracking-widest px-6 py-5 rounded-xl shadow-lg shadow-slate-200 transition-all">
-                Login Session
-              </Button>
-            </Link>
+            <>
+              <Link to="/auth/sign-in">
+                <Button variant="ghost" className="hidden sm:flex text-slate-600 font-black uppercase text-[10px] tracking-widest px-4 hover:bg-orange-50 hover:text-orange-600 transition-all">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/auth/sign-up">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-[10px] tracking-widest px-6 py-5 rounded-xl shadow-lg shadow-orange-200 transition-all active:scale-95">
+                  Get Started
+                </Button>
+              </Link>
+            </>
           )}
         </div>
       </div>

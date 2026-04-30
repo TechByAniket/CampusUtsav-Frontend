@@ -3,7 +3,7 @@ import React from 'react'
 interface StatCardProps {
     title: string;
     value: string | number;
-    colour?:string;
+    colour?: ColorKey;
 }
 
 type ColorKey = 'blue' | 'green' | 'red' | 'yellow' | 'primaryLight';

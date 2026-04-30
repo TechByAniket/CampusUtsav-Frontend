@@ -1,3 +1,4 @@
+import React from 'react';
 import { CalendarDays, MapPin } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"

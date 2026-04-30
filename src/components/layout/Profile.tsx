@@ -34,8 +34,8 @@ export const Profile = () => {
   const navLinks = [
     { label: "Home", path: "/", icon: Home },
     { label: "Explore Events", path: "/explore-events", icon: Compass },
+    { label: "My Registrations", path: "/users/registrations", icon: Sparkles },
     { label: "About Us", path: "/about", icon: Info },
-    { label: "Developers", path: "/developers", icon: Code },
   ];
 
   // Redux Auth Intel
@@ -161,22 +161,7 @@ export const Profile = () => {
               </div>
             ))}
 
-            {/* Student Specific Registrations Tab */}
-            {role === 'ROLE_STUDENT' && (
-              <DropdownMenuItem
-                onClick={() => navigate('/users/registrations')}
-                className="
-                  flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer
-                  text-[10px] font-black uppercase tracking-wider
-                  text-orange-600 bg-orange-50/50 transition-all duration-300
-                  hover:bg-orange-600 hover:text-white
-                  focus:bg-orange-600 focus:text-white
-                "
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>My Registrations</span>
-              </DropdownMenuItem>
-            )}
+
 
             {/* --- SIGN OUT --- */}
             <DropdownMenuItem

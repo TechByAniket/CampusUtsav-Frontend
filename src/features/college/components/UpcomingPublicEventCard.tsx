@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button } from '@/components/ui/button'
 import { CalendarDays, MapPin, Building2, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'

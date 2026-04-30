@@ -18,8 +18,9 @@ export const Events = () => {
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("ALL");
-  const [activeStatus, setActiveStatus] = useState("ALL");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -43,12 +44,20 @@ export const Events = () => {
                            e.clubNameShortForm.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            e.venue.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesCategory = activeCategory === "ALL" || e.eventCategory === activeCategory;
-      const matchesStatus = activeStatus === "ALL" || e.status === activeStatus;
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(e.eventCategory);
+      const matchesClub = selectedClubs.length === 0 || selectedClubs.includes(e.clubNameShortForm);
+      const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(e.status);
 
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory && matchesClub && matchesStatus;
     });
-  }, [events, searchQuery, activeCategory, activeStatus]);
+  }, [events, searchQuery, selectedCategories, selectedClubs, selectedStatus]);
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategories([]);
+    setSelectedClubs([]);
+    setSelectedStatus([]);
+  };
 
   if (loading) {
     return (
@@ -82,10 +91,13 @@ export const Events = () => {
         <EventFilterBar 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          activeStatus={activeStatus}
-          onStatusChange={setActiveStatus}
+          selectedCategories={selectedCategories}
+          onCategoriesChange={setSelectedCategories}
+          selectedClubs={selectedClubs}
+          onClubsChange={setSelectedClubs}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+          collegeId={collegeId || ""}
         />
 
         {/* Grid Content */}
@@ -117,7 +129,7 @@ export const Events = () => {
                 <p className="text-slate-400 text-sm font-medium">Try adjusting your search or filters to see more results.</p>
               </div>
               <button 
-                onClick={() => { setSearchQuery(""); setActiveCategory("ALL"); setActiveStatus("ALL"); }}
+                onClick={clearFilters}
                 className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-colors shadow-xl shadow-indigo-100"
               >
                 Clear all filters
@@ -125,6 +137,7 @@ export const Events = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
 
       </div>
     </section>
