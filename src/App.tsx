@@ -23,6 +23,7 @@ import { ExploreEventsPage } from './features/home/pages/ExploreEventsPage'
 import ScrollToTop from './components/ui/ScrollToTop'
 import { DefaultLayout } from './layouts/DefaultLayout'
 import { PublicEventDetailsPage } from './features/events/pages/PublicEventDetailsPage'
+import { AboutPage } from './features/home/pages/AboutPage'
 import { AttendancePage } from './features/attendance/pages/AttendancePage'
 import { EventRegistrationsPage } from './features/events/pages/EventRegistrationsPage'
 import { Staff } from './features/college/pages/college-dashboard/Staff'
@@ -55,6 +56,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="explore-events" element={<ExploreEventsPage />} />
         <Route path="explore-events/events/:id" element={<PublicEventDetailsPage />} />
+        <Route path="about" element={<AboutPage />} />
         <Route path="users/profile" element={<ProfilePage />} />
         <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
           <Route path="users/registrations" element={<MyRegistrationsPage />} />

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Link } from 'react-router-dom'
 
 export const CallToAction = () => {
   return (
@@ -12,7 +13,9 @@ export const CallToAction = () => {
             </p>
 
             <div className='flex justify-center items-center'>
-                <Button size="lg" className='items-center justify-center mt-6'>Get Started Now</Button>
+                <Link to="/auth/sign-up">
+                    <Button size="lg" className='items-center justify-center mt-6'>Get Started Now</Button>
+                </Link>
             </div>
         </div>
     </section>
