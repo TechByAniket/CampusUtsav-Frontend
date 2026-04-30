@@ -104,7 +104,7 @@ export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
           <MapPin size={14} className="shrink-0" />
           <span>{event.venue}</span>
           <span className="opacity-50">•</span>
-          <span>{event.club.name}</span>
+          <span>{(event as any).club?.name || (event as any).clubName}</span>
         </div>
 
         {/* Date & Time */}
