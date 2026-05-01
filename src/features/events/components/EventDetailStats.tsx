@@ -31,7 +31,8 @@ interface EventDetailStatsProps {
   venue: string;
   fees: number;
   teamEvent: boolean;
-  teamSize?: number;
+  minTeamSize?: number;
+  maxTeamSize?: number;
   maxParticipants: number;
   registrationDeadline: string;
 }
@@ -42,7 +43,8 @@ export const EventDetailStats = ({
   venue,
   fees,
   teamEvent,
-  teamSize,
+  minTeamSize = 1,
+  maxTeamSize = 1,
   maxParticipants,
   registrationDeadline
 }: EventDetailStatsProps) => {
@@ -71,7 +73,7 @@ export const EventDetailStats = ({
       <StatTile 
         icon={teamEvent ? Users2 : UserCircle2} 
         label="Participation" 
-        value={teamEvent ? `Team (Max ${teamSize})` : "Individual"} 
+        value={teamEvent ? (minTeamSize === maxTeamSize ? `Team of ${minTeamSize}` : `Team (${minTeamSize}-${maxTeamSize})`) : "Individual"} 
         color="amber"
       />
 

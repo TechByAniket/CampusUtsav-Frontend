@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Calendar, Clock, MapPin, Users, Tag, AlertCircle, ArrowRight, Share2, X } from "lucide-react";
-import type { Event } from "@/types/event";
+import type { AdminEventDetail } from "@/types/event";
 import { EventRegistrationForm } from "./RegisterEventForm";
 
-type EventKeyDetailsProps = Event;
+type EventKeyDetailsProps = AdminEventDetail;
 
 export const EventKeyDetails: React.FC<EventKeyDetailsProps> = ({
   id,
@@ -18,9 +18,12 @@ export const EventKeyDetails: React.FC<EventKeyDetailsProps> = ({
   status,
   fees,
   teamEvent,
-  teamSize,
+  minTeamSize,
+  maxTeamSize,
   club,
   registrationDeadline,
+  allowedBranches,
+  allowedYears,
 }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -113,7 +116,7 @@ export const EventKeyDetails: React.FC<EventKeyDetailsProps> = ({
               <div className="flex items-center gap-2 px-3.5 py-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
                 <Users className="w-4 h-4 text-indigo-500" />
                 <span className="text-xs font-bold text-gray-700">
-                   {teamEvent ? `Team of ${teamSize}` : "Solo Entry"}
+                   {teamEvent ? (minTeamSize === maxTeamSize ? `Team of ${minTeamSize}` : `Team (${minTeamSize}-${maxTeamSize})`) : "Solo Entry"}
                 </span>
               </div>
               
@@ -180,14 +183,16 @@ export const EventKeyDetails: React.FC<EventKeyDetailsProps> = ({
             </div>
 
             {/* Form Body - Scrollable if content is long */}
-            <div className="max-h-[80vh] overflow-y-auto p-8">
+            <div className="max-h-[80vh] overflow-y-auto p-8 font-sans">
                <EventRegistrationForm 
-                  // eventData={props} 
                   onClose={() => setIsModalOpen(false)} 
-                  teamSize={teamSize}
+                  minTeamSize={minTeamSize}
+                  maxTeamSize={maxTeamSize}
                   isTeamEvent={teamEvent}
                   eventTitle={title}
                   eventId={id}
+                  allowedBranches={allowedBranches}
+                  allowedYears={allowedYears}
                />
             </div>
           </div>

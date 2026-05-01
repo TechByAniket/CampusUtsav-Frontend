@@ -39,7 +39,8 @@ interface FormDataState {
   eventCategory: string;
   eventType: string;
   teamEvent: boolean;
-  teamSize: any;
+  minTeamSize: any;
+  maxTeamSize: any;
   maxParticipants: number;
   registrationLink: string;
   allowed_branches: number[];
@@ -60,19 +61,11 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
   const clubId = localStorage.getItem("profileId") ? Number(localStorage.getItem("profileId")) : null;
 
   const [formData, setFormData] = useState<FormDataState>({
-    title: '', 
-    description: '', 
-    fees: 0, venue: '',
-    date: '', 
-    startTime: '', 
-    endTime: '', 
-    registrationDeadline: '',
-    eventCategory: '', 
-    eventType: '', 
-    teamEvent: false, 
-    teamSize: 2,
-    maxParticipants: 100, 
-    registrationLink: '',
+    title: '', description: '', fees: 0, venue: '',
+    date: '', startTime: '', endTime: '', registrationDeadline: '',
+    eventCategory: '', eventType: '', teamEvent: false, 
+    minTeamSize: 1, maxTeamSize: 1,
+    maxParticipants: 100, registrationLink: '',
     allowed_branches: [], 
     allowed_years: [],    
     publicAttachments: [{ key: '', value: '' }],
@@ -102,7 +95,8 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
         eventCategory: initialData.eventCategory || '',
         eventType: initialData.eventType || '',
         teamEvent: initialData.teamEvent || false,
-        teamSize: initialData.teamSize || 2,
+        minTeamSize: initialData.minTeamSize || 1,
+        maxTeamSize: initialData.maxTeamSize || 1,
         maxParticipants: initialData.maxParticipants || 100,
         registrationLink: initialData.registrationLink || '',
         
@@ -194,6 +188,17 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
       return false;
     }
 
+    if (formData.teamEvent) {
+      if (formData.minTeamSize < 1 || formData.maxTeamSize < 1) {
+        toast.error("Team sizes must be at least 1.");
+        return false;
+      }
+      if (formData.minTeamSize > formData.maxTeamSize) {
+        toast.error("Minimum team size cannot be greater than maximum team size");
+        return false;
+      }
+    }
+
     return true;
   };
 
@@ -225,6 +230,7 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
       delete payload.publicAttachments;
       delete payload.privateAttachments;
       delete payload.contactDetails;
+      delete payload.teamSize;
 
       eventData.append("event", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
       
@@ -314,16 +320,69 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
                 <SelectionGroup label="Target Years *" items={years} selected={formData.allowed_years} onToggle={id => toggleSelection('allowed_years', id)} />
               </div>
 
-              <div className="flex items-center justify-between p-5 border border-indigo-100 bg-indigo-50/30 rounded-2xl">
-                <div className="flex items-center gap-4"><Users size={18} className="text-indigo-600"/><span className="text-[11px] font-black uppercase">Team Configuration</span></div>
-                <div className="flex items-center gap-5">
-                  <input type="checkbox" checked={formData.teamEvent} onChange={e => setFormData({...formData, teamEvent: e.target.checked})} className="w-5 h-5 accent-indigo-600 cursor-pointer" />
-                  {formData.teamEvent && <input type="number" value={formData.teamSize} onChange={e => setFormData({...formData, teamSize: e.target.value})} className="w-16 p-2 bg-white border border-indigo-200 rounded-lg text-center font-bold text-xs" />}
+              <div className="flex flex-col gap-4 p-5 border border-indigo-100 bg-indigo-50/30 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Users size={18} className="text-indigo-600"/>
+                    <span className="text-[11px] font-black uppercase">Team Configuration</span>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={formData.teamEvent} 
+                    onChange={e => {
+                      const checked = e.target.checked;
+                      setFormData(prev => ({
+                        ...prev, 
+                        teamEvent: checked, 
+                        minTeamSize: checked ? (prev.minTeamSize > 1 ? prev.minTeamSize : 2) : 1, 
+                        maxTeamSize: checked ? (prev.maxTeamSize > 1 ? prev.maxTeamSize : 2) : 1
+                      }));
+                    }} 
+                    className="w-5 h-5 accent-indigo-600 cursor-pointer" 
+                  />
                 </div>
+                {formData.teamEvent && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Min Team Size</label>
+                        <input 
+                          type="number" 
+                          min={1} 
+                          value={formData.minTeamSize} 
+                          onChange={e => setFormData({ ...formData, minTeamSize: Number(e.target.value) })} 
+                          className="w-full p-2.5 bg-white border border-indigo-200 rounded-xl text-center font-bold text-xs" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Max Team Size</label>
+                        <input 
+                          type="number" 
+                          min={1} 
+                          value={formData.maxTeamSize} 
+                          onChange={e => setFormData({ ...formData, maxTeamSize: Number(e.target.value) })} 
+                          className="w-full p-2.5 bg-white border border-indigo-200 rounded-xl text-center font-bold text-xs" 
+                        />
+                      </div>
+                    </div>
+                    {formData.minTeamSize > formData.maxTeamSize && (
+                      <p className="text-red-500 text-[10px] font-bold uppercase mt-1">
+                        Minimum team size cannot be greater than maximum team size
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end pt-4">
-                <button type="button" onClick={() => validateStep1() && setStep(2)} className="bg-slate-900 text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-indigo-600 transition-all shadow-lg">Continue <ChevronRight size={14}/></button>
+                <button 
+                  type="button" 
+                  disabled={formData.teamEvent && formData.minTeamSize > formData.maxTeamSize}
+                  onClick={() => validateStep1() && setStep(2)} 
+                  className="bg-slate-900 text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-indigo-600 transition-all shadow-lg disabled:bg-slate-300 disabled:cursor-not-allowed"
+                >
+                  Continue <ChevronRight size={14}/>
+                </button>
               </div>
             </div>
           ) : (
@@ -372,7 +431,7 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
 
               <div className="flex gap-4">
                 <button type="button" onClick={() => setStep(1)} className="flex-1 py-4 border border-slate-200 rounded-xl text-[10px] font-black uppercase text-slate-400">Back</button>
-                <button type="submit" className="flex-[2] py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-100 flex justify-center items-center gap-2 hover:bg-emerald-700 transition-all">
+                <button type="submit" disabled={formData.teamEvent && formData.minTeamSize > formData.maxTeamSize} className="flex-[2] py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-100 flex justify-center items-center gap-2 hover:bg-emerald-700 transition-all disabled:bg-slate-300 disabled:cursor-not-allowed">
                   {initialData ? 'Update & Resubmit' : 'Finalize & Submit'} <Send size={14}/>
                 </button>
               </div>

@@ -78,12 +78,12 @@ export const AdminEventDetailsPage = () => {
   const coreStats = [
     { label: "Entry", value: event.fees === 0 ? "FREE" : `₹${event.fees}`, icon: CreditCard, color: "emerald" },
     { label: "Participation", value: `${event.maxParticipants} slots`, icon: Users2, color: "indigo" },
-    { label: "Type", value: event.teamEvent ? `${event.teamSize} MEMBER` : "Individual", icon: UserCircle2, color: "amber" },
+    { label: "Type", value: event.teamEvent ? (event.minTeamSize === event.maxTeamSize ? `TEAM (${event.minTeamSize})` : `TEAM (${event.minTeamSize}-${event.maxTeamSize})`) : "Individual", icon: UserCircle2, color: "amber" },
     { label: "Time", value: `${event.startTime?.slice(0, 5)} - ${event.endTime?.slice(0, 5)}`, icon: Clock, color: "rose" }
   ];
 
   return (
-    <section className="w-full min-h-screen bg-white pt-0 pb-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
+    <div className="w-full min-h-screen bg-white pt-0 pb-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
       <div className="max-w-[1550px] mx-auto space-y-12">
         
         {/* Navigation & Informative Header (Floating) */}
@@ -93,7 +93,7 @@ export const AdminEventDetailsPage = () => {
                 className="absolute -top-6 left-0 group flex items-center gap-3 text-slate-500 hover:text-indigo-600 transition-all"
               >
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center group-hover:border-indigo-200 group-hover:bg-indigo-100 transition-all shadow-sm">
-                  <ChevronLeft size={18} className="text-indigo-600" />
+                   <ChevronLeft size={18} className="text-indigo-600" />
                 </div>
                 <div className="flex flex-col items-start opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
                    <p className="text-[9px] font-black text-indigo-600 uppercase tracking-[0.2em]">Return to Console</p>
@@ -122,7 +122,8 @@ export const AdminEventDetailsPage = () => {
                 date={event.date}
                 deadline={event.registrationDeadline}
                 eventId={event.id}
-                teamSize={event.teamSize}
+                minTeamSize={event.minTeamSize}
+                maxTeamSize={event.maxTeamSize}
               />
            </div>
         </div>
@@ -199,6 +200,6 @@ export const AdminEventDetailsPage = () => {
            </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

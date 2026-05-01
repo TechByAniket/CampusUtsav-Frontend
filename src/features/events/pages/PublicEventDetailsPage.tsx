@@ -105,12 +105,12 @@ export const PublicEventDetailsPage = () => {
   const coreStats = [
     { label: "Entry", value: event.fees === 0 ? "FREE" : `₹${event.fees}`, icon: CreditCard, color: "emerald" },
     { label: "Participation", value: `${event.maxParticipants} slots`, icon: Users2, color: "indigo" },
-    { label: "Type", value: event.teamEvent ? `${event.teamSize} MEMBER` : "Individual", icon: UserCircle2, color: "amber" },
+    { label: "Type", value: event.teamEvent ? (event.minTeamSize === event.maxTeamSize ? `TEAM (${event.minTeamSize})` : `TEAM (${event.minTeamSize}-${event.maxTeamSize})`) : "Individual", icon: UserCircle2, color: "amber" },
     { label: "Time", value: `${event.startTime?.slice(0, 5)} - ${event.endTime?.slice(0, 5)}`, icon: Clock, color: "rose" }
   ];
 
   return (
-    <section className="w-full min-h-screen bg-white pt-0 pb-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
+    <div className="w-full min-h-screen bg-white pt-0 pb-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Navigation Phase (Floating) */}
@@ -149,7 +149,8 @@ export const PublicEventDetailsPage = () => {
                 date={event.date}
                 deadline={event.registrationDeadline}
                 eventId={event.id}
-                teamSize={event.teamSize}
+                minTeamSize={event.minTeamSize}
+                maxTeamSize={event.maxTeamSize}
                 isTeamEvent={event.teamEvent}
                 isEligible={eligible}
                 ineligibilityReason={reason}
@@ -224,6 +225,6 @@ export const PublicEventDetailsPage = () => {
            </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

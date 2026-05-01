@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Services
 import { 
@@ -21,6 +21,7 @@ import { EventsStats } from '../../components/events/EventsStats';
 import { EventsTable } from '../../components/events/EventsTable';
 import { SubmissionModal } from '../../components/events/SubmissionModal';
 import { ResubmitModal } from '../../components/events/ResubmitModal';
+import { OnePageCreateEventForm } from '@/features/events/components/CreateEventForm';
 
 import type { EventSummary, Event } from '@/types/event';
 
@@ -30,6 +31,7 @@ export const ClubEvents = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<EventSummary | null>(null);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Filtering Logic
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
@@ -82,7 +84,7 @@ export const ClubEvents = () => {
         <EventsHeader 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          onCreateClick={() => navigate('/club-dashboard/events/create')}
+          onCreateClick={() => setIsCreateModalOpen(true)}
         />
 
         {/* KPI Summary Section */}
@@ -143,6 +145,35 @@ export const ClubEvents = () => {
           />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isCreateModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto no-scrollbar font-sans">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl relative overflow-hidden border border-slate-200 my-auto"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 italic">Create New Event</h3>
+                <button onClick={() => setIsCreateModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="max-h-[85vh] overflow-y-auto no-scrollbar">
+                <OnePageCreateEventForm
+                  isModal={true}
+                  onClose={() => {
+                    setIsCreateModalOpen(false);
+                    window.location.reload();
+                  }}
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
+};

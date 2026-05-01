@@ -54,12 +54,12 @@ interface HeroStat {
 
 export const BentoHeroDetail = ({ 
   title, status, category, venue, 
-  stats, date, deadline, eventId, teamSize = 1, isTeamEvent = false,
+  stats, date, deadline, eventId, minTeamSize = 1, maxTeamSize = 1, isTeamEvent = false,
   isEligible = true, ineligibilityReason = "",
   allowedBranches = {}, allowedYears = {}
 }: { 
   title: string, status: string, category: string, venue: string,
-  stats: HeroStat[], date: string, deadline: string, eventId: number, teamSize?: number,
+  stats: HeroStat[], date: string, deadline: string, eventId: number, minTeamSize?: number, maxTeamSize?: number,
   isTeamEvent?: boolean,
   isEligible?: boolean, ineligibilityReason?: string,
   allowedBranches?: Record<string, string>, allowedYears?: Record<string, string>
@@ -189,7 +189,7 @@ export const BentoHeroDetail = ({
       {/* --- REGISTRATION MODAL --- */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 font-sans">
              {/* Backdrop */}
              <motion.div 
                initial={{ opacity: 0 }}
@@ -204,7 +204,7 @@ export const BentoHeroDetail = ({
                initial={{ opacity: 0, scale: 0.95, y: 20 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto font-sans"
              >
                 {/* Close Button */}
                 <button 
@@ -217,7 +217,8 @@ export const BentoHeroDetail = ({
                 <EventRegistrationForm 
                   eventId={eventId}
                   eventTitle={title}
-                  teamSize={teamSize}
+                  minTeamSize={minTeamSize}
+                  maxTeamSize={maxTeamSize}
                   isTeamEvent={isTeamEvent}
                   onClose={() => setIsModalOpen(false)}
                   allowedBranches={allowedBranches}

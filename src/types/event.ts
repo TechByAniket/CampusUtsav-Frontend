@@ -59,7 +59,8 @@ export type Event = {
   /* ===== Participation ===== */
   fees: number;
   teamEvent: boolean;
-  teamSize: number;
+  minTeamSize: number;
+  maxTeamSize: number;
   maxParticipants: number;
   registrationLink: string;
 
@@ -137,7 +138,8 @@ export interface AdminEventDetail {
   startTime: string;
   endTime: string;
   teamEvent: boolean;
-  teamSize: number;
+  minTeamSize: number;
+  maxTeamSize: number;
   maxParticipants: number;
   publicAttachments: Record<string, string>;
   privateAttachments: Record<string, string>;

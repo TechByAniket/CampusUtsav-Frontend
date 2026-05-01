@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   Zap,
-  Mail
+  Mail,
+  Plus
 } from "lucide-react";
 import { fetchTeamMembersMetaData } from "@/services/eventService";
 import { registerForEvent } from "@/services/eventRegistrationService";
@@ -33,13 +34,14 @@ const YEAR_MAPPING: Record<string, string> = {
 export const EventRegistrationForm: React.FC<{
   onClose: () => void;
   eventTitle?: string;
-  teamSize?: number;
+  minTeamSize?: number;
+  maxTeamSize?: number;
   isTeamEvent?: boolean;
   eventId: number;
   allowedBranches?: Record<string, string>;
   allowedYears?: Record<string, string>;
 }> = ({ 
-  onClose, teamSize = 1, isTeamEvent = false, eventTitle, eventId,
+  onClose, minTeamSize = 1, maxTeamSize = 1, isTeamEvent = false, eventTitle, eventId,
   allowedBranches = {}, allowedYears = {}
 }) => {
    const student = useSelector((state: RootState) => state.auth.studentSummary);
@@ -47,7 +49,7 @@ export const EventRegistrationForm: React.FC<{
 
   /* ================= FORM STATE ================= */
   const [registrationType, setRegistrationType] = useState<"INDIVIDUAL" | "TEAM">(
-    isTeamEvent ? "TEAM" : "INDIVIDUAL"
+    minTeamSize > 1 ? "TEAM" : (isTeamEvent ? "TEAM" : "INDIVIDUAL")
   );
   const [leaderId, setLeaderId] = useState<number | null>(student?.id || null);
 
@@ -55,6 +57,8 @@ export const EventRegistrationForm: React.FC<{
     teamName: "",
     teamMembers: [] as string[],
   });
+
+  const [partnerCount, setPartnerCount] = useState<number>(Math.max(1, minTeamSize - 1));
 
   /* Preview data per team member index */
   const [teamMembersMeta, setTeamMembersMeta] = useState<
@@ -116,6 +120,14 @@ export const EventRegistrationForm: React.FC<{
     }
   };
 
+  const addPartnerField = () => {
+    if (partnerCount + 1 > maxTeamSize - 1) {
+      toast.error("Maximum team size limit reached.");
+      return;
+    }
+    setPartnerCount(prev => prev + 1);
+  };
+
   /* ================= SUBMIT ================= */
 
   const handleSubmit = async () => {
@@ -128,8 +140,8 @@ export const EventRegistrationForm: React.FC<{
          return;
        }
        const verifiedCount = Object.keys(teamMembersMeta).length;
-       if (verifiedCount < teamSize - 1) {
-         toast.error(`Verification incomplete. Please verify all ${teamSize - 1} team members.`);
+       if (verifiedCount < minTeamSize - 1) {
+         toast.error(`Verification incomplete. Please verify at least ${minTeamSize - 1} team members.`);
          return;
        }
        if (!leaderId) {
@@ -200,7 +212,7 @@ export const EventRegistrationForm: React.FC<{
       <div className="px-6 py-6 space-y-6 max-h-[60vh] overflow-y-auto no-scrollbar font-jakarta">
         
         {/* ===== REGISTRATION TYPE SELECTION ===== */}
-        {isTeamEvent && (
+        {isTeamEvent && minTeamSize === 1 && (
           <section className="space-y-4">
             <div className="flex items-center gap-2 mb-1">
                <div className="w-1 h-4 bg-primary rounded-full" />
@@ -242,12 +254,12 @@ export const EventRegistrationForm: React.FC<{
              <div className="w-1 h-4 bg-indigo-600 rounded-full" />
              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Primary Candidate Information</h3>
              {registrationType === "TEAM" && (
-               <div className="px-3 py-1.5 rounded-full border flex items-center gap-2 bg-amber-50/50 border-amber-500/20 text-amber-600">
-                 <Users size={12} />
-                 <span className="text-[10px] font-black uppercase tracking-widest leading-none">
-                   Team Formation
-                 </span>
-               </div>
+                <div className="px-3 py-1.5 rounded-full border flex items-center gap-2 bg-amber-50/50 border-amber-500/20 text-amber-600">
+                  <Users size={12} />
+                  <span className="text-[10px] font-black uppercase tracking-widest leading-none">
+                    Team Formation
+                  </span>
+                </div>
              )}
           </div>
           
@@ -283,7 +295,7 @@ export const EventRegistrationForm: React.FC<{
 
               {/* Members Grid - High Density */}
               <div className="space-y-3">
-                 {Array.from({ length: teamSize - 1 }).map((_, idx) => (
+                 {Array.from({ length: partnerCount }).map((_, idx) => (
                   <div key={idx} className="flex flex-col gap-2 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                     <div className="flex gap-2">
                       <div className="relative flex-1">
@@ -339,8 +351,18 @@ export const EventRegistrationForm: React.FC<{
                 ))}
               </div>
 
+              {partnerCount < maxTeamSize - 1 && minTeamSize !== maxTeamSize && (
+                <button
+                  type="button"
+                  onClick={addPartnerField}
+                  className="mt-2 text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2 flex items-center gap-2 w-fit"
+                >
+                  <Plus size={14} /> Add Member
+                </button>
+              )}
+
               {/* Leader Selection Section */}
-              {Object.keys(teamMembersMeta).length === teamSize - 1 && (
+              {Object.keys(teamMembersMeta).length === partnerCount && (
                 <div className="space-y-3 pt-2">
                    <div className="flex items-center gap-2 mb-1">
                       <div className="w-1 h-4 bg-emerald-500 rounded-full" />
