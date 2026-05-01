@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Calendar, Clock, MapPin, Users, Tag, AlertCircle, ArrowRight, Share2, X } from "lucide-react";
 import type { Event } from "@/types/event";
-import { Link } from "react-router-dom";
 import { EventRegistrationForm } from "./RegisterEventForm";
 
 type EventKeyDetailsProps = Event;
@@ -43,10 +42,6 @@ export const EventKeyDetails: React.FC<EventKeyDetailsProps> = ({
 
   const openEventRegistrationModal = () => {
     setIsModalOpen(true);
-  }
-
-  const closeEventRegistrationModal = () => {
-    setIsModalOpen(false);
   }
 
   return (

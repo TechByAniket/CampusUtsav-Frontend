@@ -79,12 +79,12 @@ export const EventListCard = ({ event, onClick }: EventListCardProps) => {
         </div>
 
         {/* Status Badge */}
-        {/* <div className={`absolute top-4 right-4 px-3 py-1 ${status.bg} border ${status.border} rounded-full flex items-center gap-1.5 shadow-sm`}>
+        <div className={`absolute top-4 right-4 px-3 py-1 ${status.bg} border ${status.border} rounded-full flex items-center gap-1.5 shadow-sm`}>
            <StatusIcon size={12} className={status.text} />
            <span className={`text-[10px] font-black uppercase tracking-wider ${status.text}`}>
              {status.label}
            </span>
-        </div> */}
+        </div>
       </div>
 
       {/* Content */}

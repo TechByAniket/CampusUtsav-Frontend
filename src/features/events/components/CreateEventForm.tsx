@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, Clock, MapPin, Tag, Users, ChevronRight, 
+  Users, ChevronRight, 
   Upload, Send, Plus, Trash2, Globe, Lock,
   Sparkles, Phone, Mail, User
 } from 'lucide-react';
@@ -8,21 +8,71 @@ import { toast } from 'sonner';
 
 import { fetchEventMetaData, createEvent, resubmitEvent } from '@/services/eventService';
 import { getAllBranchesOfCollege } from '@/services/collegeService';
+import type { AdminEventDetail } from '@/types/event';
 
-export const OnePageCreateEventForm = ({ initialData = null, isModal = false, onClose }) => {
+interface OnePageCreateEventFormProps {
+  initialData?: AdminEventDetail | null;
+  isModal?: boolean;
+  onClose: () => void;
+}
+
+interface Attachment {
+  key: string;
+  value: string;
+}
+
+interface Contact {
+  name: string;
+  phone: string;
+  email: string;
+}
+
+interface FormDataState {
+  title: string;
+  description: string;
+  fees: number;
+  venue: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  registrationDeadline: string;
+  eventCategory: string;
+  eventType: string;
+  teamEvent: boolean;
+  teamSize: any;
+  maxParticipants: number;
+  registrationLink: string;
+  allowed_branches: number[];
+  allowed_years: number[];
+  publicAttachments: Attachment[];
+  privateAttachments: Attachment[];
+  contactDetails: Contact[];
+  poster: File | null;
+}
+
+export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ initialData = null, isModal = false, onClose }) => {
   const [step, setStep] = useState(1);
-  const [metaData, setMetaData] = useState({}); 
-  const [collegeBranches, setCollegeBranches] = useState({}); 
+  const [metaData, setMetaData] = useState<Record<string, string[]>>({}); 
+  const [collegeBranches, setCollegeBranches] = useState<Record<string, string>>({}); 
   const todayString = new Date().toISOString().split('T')[0];
 
   const collegeId = localStorage.getItem("collegeId") ? Number(localStorage.getItem("collegeId")) : null;
   const clubId = localStorage.getItem("profileId") ? Number(localStorage.getItem("profileId")) : null;
 
-  const [formData, setFormData] = useState({
-    title: '', description: '', fees: 0, venue: '',
-    date: '', startTime: '', endTime: '', registrationDeadline: '',
-    eventCategory: '', eventType: '', teamEvent: false, teamSize: 2,
-    maxParticipants: 100, registrationLink: '',
+  const [formData, setFormData] = useState<FormDataState>({
+    title: '', 
+    description: '', 
+    fees: 0, venue: '',
+    date: '', 
+    startTime: '', 
+    endTime: '', 
+    registrationDeadline: '',
+    eventCategory: '', 
+    eventType: '', 
+    teamEvent: false, 
+    teamSize: 2,
+    maxParticipants: 100, 
+    registrationLink: '',
     allowed_branches: [], 
     allowed_years: [],    
     publicAttachments: [{ key: '', value: '' }],
@@ -87,7 +137,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
       try {
         const [meta, branches] = await Promise.all([
           fetchEventMetaData(),
-          getAllBranchesOfCollege(collegeId) 
+          getAllBranchesOfCollege(collegeId || 0) 
         ]);
         setMetaData(meta);
         setCollegeBranches(branches);
@@ -109,7 +159,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
     initData();
   }, [collegeId, initialData]);
 
-  const handleCategoryChange = (e) => {
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCat = e.target.value;
     setFormData(prev => ({
       ...prev,
@@ -118,8 +168,8 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
     }));
   };
 
-  const toggleSelection = (field, id) => {
-    const numericId = parseInt(id);
+  const toggleSelection = (field: 'allowed_branches' | 'allowed_years', id: string | number) => {
+    const numericId = parseInt(id.toString());
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].includes(numericId) ? prev[field].filter(i => i !== numericId) : [...prev[field], numericId]
@@ -147,7 +197,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
     return true;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.poster && !initialData) return toast.error("Poster is required.");
 
@@ -170,12 +220,13 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
           }), {})
       };
       
-      delete eventJson.poster;
-      delete eventJson.publicAttachments;
-      delete eventJson.privateAttachments;
-      delete eventJson.contactDetails;
+      const payload: any = { ...eventJson };
+      delete payload.poster;
+      delete payload.publicAttachments;
+      delete payload.privateAttachments;
+      delete payload.contactDetails;
 
-      eventData.append("event", new Blob([JSON.stringify(eventJson)], { type: 'application/json' }));
+      eventData.append("event", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
       
       // FIX: Ensure 'file' part is present even if no new poster is selected
       if (formData.poster) {
@@ -189,11 +240,11 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
         await resubmitEvent(eventData, initialData.id);
         toast.success("Event Updated & Resubmitted!");
       } else {
-        await createEvent(eventData, clubId);
+        await createEvent(eventData, clubId || 0);
         toast.success("Event Created Successfully!");
       }
 
-      if(isModal) onClose();
+      if (isModal) onClose();
     } catch (err) {
       toast.error("Action failed.");
     }
@@ -225,7 +276,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <CompactInput label="Title *" value={formData.title} onChange={v => setFormData({...formData, title: v})} />
                   <CompactInput label="Venue *" value={formData.venue} onChange={v => setFormData({...formData, venue: v})} />
-                  <CompactInput label="Fees (₹) *" type="number" value={formData.fees} onChange={v => setFormData({...formData, fees: v})} />
+                  <CompactInput label="Fees (₹) *" type="number" value={formData.fees} onChange={v => setFormData({...formData, fees: Number(v)})} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div className="flex flex-col gap-1.5">
@@ -244,7 +295,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Description *</label>
-                  <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows="4" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-xs font-bold resize-none outline-none focus:border-indigo-500 transition-all" />
+                  <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={4} className="w-full px-4 py-3 border border-slate-200 rounded-xl text-xs font-bold resize-none outline-none focus:border-indigo-500 transition-all" />
                 </div>
               </div>
 
@@ -315,7 +366,7 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
                 </div>
                 <label className="relative h-48 bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition-all overflow-hidden group">
                   {formData.poster ? <img src={URL.createObjectURL(formData.poster)} className="w-full h-full object-cover" /> : initialData ? <img src={initialData.posterUrl} className="w-full h-full object-cover opacity-50" /> : <Upload size={24} className="text-slate-300" />}
-                  <input type="file" className="hidden" accept="image/*" onChange={e => setFormData({...formData, poster: e.target.files[0]})} />
+                  <input type="file" className="hidden" accept="image/*" onChange={e => setFormData({...formData, poster: e.target.files ? e.target.files[0] : null})} />
                 </label>
               </div>
 
@@ -333,24 +384,72 @@ export const OnePageCreateEventForm = ({ initialData = null, isModal = false, on
   );
 };
 
-const SectionHeader = ({ label }) => (<h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2"><div className="w-1.5 h-1.5 bg-indigo-600 rounded-full" /> {label}</h3>);
-const CompactInput = ({ label, value, onChange, type="text", min, max }) => (
-  <div className="flex flex-col gap-1.5"><label className="text-[10px] font-black uppercase text-slate-400 ml-1">{label}</label>
-  <input type={type} value={value} min={min} max={max} onChange={e => onChange(e.target.value)} className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 transition-all" /></div>
+const SectionHeader = ({ label }: { label: string }) => (
+  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+    <div className="w-1.5 h-1.5 bg-indigo-600 rounded-full" /> {label}
+  </h3>
 );
-const SelectionGroup = ({ label, items, selected, onToggle }) => (
-  <div className="space-y-4"><SectionHeader label={label} /><div className="flex flex-wrap gap-2">{items.map(i => (
-    <button key={i.id} type="button" onClick={() => onToggle(i.id)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${selected.includes(parseInt(i.id)) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-100 hover:border-indigo-200'}`}>{i.name}</button>
-  ))}</div></div>
+
+const CompactInput = ({ label, value, onChange, type="text", min, max }: { label: string; value: any; onChange: (v: any) => void; type?: string; min?: string; max?: string }) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">{label}</label>
+    <input 
+      type={type} 
+      value={value} 
+      min={min} 
+      max={max} 
+      onChange={e => onChange(e.target.value)} 
+      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 transition-all" 
+    />
+  </div>
 );
-const AttachmentList = ({ title, icon, rows, onAdd, onRemove, onChange }) => (
+
+const SelectionGroup = ({ label, items, selected, onToggle }: { label: string; items: any[]; selected: number[]; onToggle: (id: string | number) => void }) => (
   <div className="space-y-4">
-    <div className="flex justify-between items-center px-2"><div className="flex items-center gap-2"><div className="text-indigo-600">{icon}</div><h4 className="text-[11px] font-black uppercase tracking-widest">{title}</h4></div><button type="button" onClick={onAdd} className="p-2 bg-slate-900 text-white rounded-lg shadow-sm"><Plus size={14}/></button></div>
+    <SectionHeader label={label} />
+    <div className="flex flex-wrap gap-2">
+      {items.map(i => (
+        <button 
+          key={i.id} 
+          type="button" 
+          onClick={() => onToggle(i.id)} 
+          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${selected.includes(parseInt(i.id)) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-100 hover:border-indigo-200'}`}
+        >
+          {i.name}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+const AttachmentList = ({ title, icon, rows, onAdd, onRemove, onChange }: { title: string; icon: React.ReactNode; rows: Attachment[]; onAdd: () => void; onRemove: (i: number) => void; onChange: (i: number, f: 'key' | 'value', v: string) => void }) => (
+  <div className="space-y-4">
+    <div className="flex justify-between items-center px-2">
+      <div className="flex items-center gap-2">
+        <div className="text-indigo-600">{icon}</div>
+        <h4 className="text-[11px] font-black uppercase tracking-widest">{title}</h4>
+      </div>
+      <button type="button" onClick={onAdd} className="p-2 bg-slate-900 text-white rounded-lg shadow-sm">
+        <Plus size={14}/>
+      </button>
+    </div>
     {rows.map((row, i) => (
       <div key={i} className="flex gap-3 animate-in slide-in-from-bottom-2 duration-200">
-        <input value={row.key} onChange={e => onChange(i, 'key', e.target.value)} placeholder="Doc Name" className="w-1/3 px-4 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none" />
-        <input value={row.value} onChange={e => onChange(i, 'value', e.target.value)} placeholder="URL Link" className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none" />
-        <button type="button" onClick={() => onRemove(i)} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
+        <input 
+          value={row.key} 
+          onChange={e => onChange(i, 'key', e.target.value)} 
+          placeholder="Doc Name" 
+          className="w-1/3 px-4 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none" 
+        />
+        <input 
+          value={row.value} 
+          onChange={e => onChange(i, 'value', e.target.value)} 
+          placeholder="URL Link" 
+          className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none" 
+        />
+        <button type="button" onClick={() => onRemove(i)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+          <Trash2 size={16}/>
+        </button>
       </div>
     ))}
   </div>

@@ -8,13 +8,10 @@ import {
   BookOpen,
   Fingerprint,
   Calendar,
-  CreditCard,
-  ChevronRight,
   Users,
   Hash,
   Search,
   CheckCircle2,
-  X,
   ShieldCheck,
   Zap,
   Mail
