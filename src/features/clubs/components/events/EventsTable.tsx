@@ -25,6 +25,22 @@ interface EventsTableProps {
   onNavigateToEvent: (id: number) => void;
 }
 
+const formatEventDate = (startDate: string, endDate: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
+
 export const EventsTable: React.FC<EventsTableProps> = ({
   events,
   isLoading,
@@ -168,7 +184,7 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                   <td className="px-8 py-5">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2.5 text-[11px] font-black text-slate-700 uppercase tracking-tight">
-                        <CalendarIcon size={13} className="text-indigo-500" /> {event.date}
+                        <CalendarIcon size={13} className="text-indigo-500" /> {formatEventDate(event.startDate, event.endDate)}
                       </div>
                       <div className="flex items-center gap-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         <MapPinIcon size={12} className="text-slate-300" /> {event.venue || "TBD"}

@@ -17,6 +17,22 @@ const getStatusStyles = (status: string) => {
   }
 }
 
+const formatEventDate = (startDate: string, endDate: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
+
 export const BentoEventCard: React.FC<Event> = (event) => {
   const statusConfig = getStatusStyles(event.status);
 
@@ -67,7 +83,7 @@ export const BentoEventCard: React.FC<Event> = (event) => {
                  <span className="text-[9px] font-black uppercase tracking-widest">Schedule</span>
               </div>
               <p className="text-[11px] font-bold text-slate-700">
-                {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric'})}
+                {formatEventDate(event.startDate, event.endDate)}
               </p>
            </div>
            

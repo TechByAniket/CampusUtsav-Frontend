@@ -32,7 +32,8 @@ interface FormDataState {
   description: string;
   fees: number;
   venue: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
   registrationDeadline: string;
@@ -62,7 +63,7 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
 
   const [formData, setFormData] = useState<FormDataState>({
     title: '', description: '', fees: 0, venue: '',
-    date: '', startTime: '', endTime: '', registrationDeadline: '',
+    startDate: '', endDate: '', startTime: '', endTime: '', registrationDeadline: '',
     eventCategory: '', eventType: '', teamEvent: false, 
     minTeamSize: 1, maxTeamSize: 1,
     maxParticipants: 100, registrationLink: '',
@@ -88,7 +89,8 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
         description: initialData.description || '',
         fees: initialData.fees || 0,
         venue: initialData.venue || '',
-        date: initialData.date || '',
+        startDate: initialData.startDate || '',
+        endDate: initialData.endDate || '',
         startTime: initialData.startTime || '',
         endTime: initialData.endTime || '',
         registrationDeadline: initialData.registrationDeadline || '',
@@ -108,14 +110,15 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
           : [],
 
         publicAttachments: initialData.publicAttachments 
-          ? Object.entries(initialData.publicAttachments).map(([k, v]) => ({ key: k, value: v }))
+          ? Object.entries(initialData.publicAttachments).map(([key, value]) => ({ key, value }))
           : [{ key: '', value: '' }],
-        privateAttachments: initialData.privateAttachments
-          ? Object.entries(initialData.privateAttachments).map(([k, v]) => ({ key: k, value: v }))
+        privateAttachments: initialData.privateAttachments 
+          ? Object.entries(initialData.privateAttachments).map(([key, value]) => ({ key, value }))
           : [{ key: '', value: '' }],
-        contactDetails: initialData.contactDetails
-          ? Object.entries(initialData.contactDetails).map(([name, info]) => ({ 
-              name: name, 
+
+        contactDetails: initialData.contactDetails 
+          ? Object.entries(initialData.contactDetails).map(([name, info]: any) => ({ 
+              name, 
               phone: info.phone || '', 
               email: info.email || '' 
             }))
@@ -171,10 +174,15 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
   };
 
   const validateStep1 = () => {
-    const { title, venue, date, startTime, endTime, registrationDeadline, description, allowed_branches, allowed_years } = formData;
+    const { title, venue, startDate, endDate, startTime, endTime, registrationDeadline, description, allowed_branches, allowed_years } = formData;
     
-    if (!title || !venue || !date || !startTime || !endTime || !registrationDeadline || !description) {
+    if (!title || !venue || !startDate || !endDate || !startTime || !endTime || !registrationDeadline || !description) {
       toast.error("Required fields missing.");
+      return false;
+    }
+
+    if (startDate > endDate) {
+      toast.error("End date cannot be before start date");
       return false;
     }
 
@@ -234,11 +242,9 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
 
       eventData.append("event", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
       
-      // FIX: Ensure 'file' part is present even if no new poster is selected
       if (formData.poster) {
         eventData.append("file", formData.poster);
       } else {
-        // Send an empty blob with the same part name to satisfy backend @RequestPart requirements
         eventData.append("file", new Blob([], { type: 'application/octet-stream' }));
       }
 
@@ -250,54 +256,62 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
         toast.success("Event Created Successfully!");
       }
 
-      if (isModal) onClose();
-    } catch (err) {
-      toast.error("Action failed.");
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message || "Operation failed.");
     }
   };
 
-  const currentTypes = formData.eventCategory ? (metaData[formData.eventCategory] || []) : [];
-
   return (
-    <div className={`${isModal ? 'w-full' : 'w-full min-h-screen bg-[#F8FAFC] py-10 px-4'} font-sans`}>
-      <div className={`${isModal ? '' : 'max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden'}`}>
-        {!isModal && (
-          <div className="border-b border-slate-100 p-6 flex justify-between items-center bg-slate-50/50">
-            <div className="flex items-center gap-3">
-              <Sparkles className="text-indigo-600" size={24} />
-              <h2 className="text-sm font-black uppercase tracking-tight italic">Event Console / Stage {step}</h2>
-            </div>
-            <div className="flex gap-1.5">
-              <div className={`h-1.5 w-8 rounded-full ${step === 1 ? 'bg-indigo-600' : 'bg-emerald-500'}`} />
-              <div className={`h-1.5 w-8 rounded-full ${step === 2 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
-            </div>
-          </div>
-        )}
+    <div className={`${isModal ? 'p-8' : 'w-full max-w-5xl mx-auto py-12'} bg-white font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100`}>
+      <div className="space-y-10">
+        
+        {/* Step Indicator Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-5">
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
+                 <Sparkles size={20} className="text-indigo-600" />
+              </div>
+              <div>
+                 <h2 className="text-xl md:text-3xl font-black tracking-tight uppercase leading-none">
+                   {initialData ? 'Update Intel' : 'Propose Event'}
+                 </h2>
+                 <p className="text-[10px] font-black text-indigo-600/60 uppercase tracking-widest mt-1">Creation & Proposal Engine v2</p>
+              </div>
+           </div>
 
-        <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-12">
+           <div className="flex items-center gap-3">
+              <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${step === 1 ? 'bg-indigo-600 border-indigo-700 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>1. Logistics</div>
+              <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${step === 2 ? 'bg-indigo-600 border-indigo-700 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>2. Supporting Details</div>
+           </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-12">
           {step === 1 ? (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-10">
-              <div className="space-y-5">
-                <SectionHeader label="1. Core Logistics" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-12">
+              
+              <div className="space-y-6">
+                <SectionHeader label="1. Basic Details" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <CompactInput label="Title *" value={formData.title} onChange={v => setFormData({...formData, title: v})} />
                   <CompactInput label="Venue *" value={formData.venue} onChange={v => setFormData({...formData, venue: v})} />
-                  <CompactInput label="Fees (₹) *" type="number" value={formData.fees} onChange={v => setFormData({...formData, fees: Number(v)})} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Category</label>
-                        <select value={formData.eventCategory} onChange={handleCategoryChange} className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500">
-                            {Object.keys(metaData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                        </select>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Type</label>
-                        <select value={formData.eventType} onChange={e => setFormData({...formData, eventType: e.target.value})} className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500">
-                            {currentTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                    </div>
-                    <CompactInput label="Registration Link" value={formData.registrationLink} onChange={v => setFormData({...formData, registrationLink: v})} />
+                  
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Event Category *</label>
+                    <select value={formData.eventCategory} onChange={handleCategoryChange} className="w-full px-4 py-3 border border-slate-200 bg-slate-50/50 rounded-xl text-xs font-bold uppercase outline-none focus:border-indigo-400 transition-all select-none">
+                      {Object.keys(metaData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Event Sub-Type *</label>
+                    <select value={formData.eventType} onChange={e => setFormData({...formData, eventType: e.target.value})} className="w-full px-4 py-3 border border-slate-200 bg-slate-50/50 rounded-xl text-xs font-bold uppercase outline-none focus:border-indigo-400 transition-all select-none">
+                      {(metaData[formData.eventCategory] || []).map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+
+                  <CompactInput label="Registration Fees (₹) *" type="number" value={formData.fees} onChange={v => setFormData({...formData, fees: Number(v)})} />
+                  <CompactInput label="Registration Link" value={formData.registrationLink} onChange={v => setFormData({...formData, registrationLink: v})} />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Description *</label>
@@ -307,12 +321,18 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
 
               <div className="space-y-5">
                 <SectionHeader label="2. Schedule" />
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                  <CompactInput label="Date *" type="date" min={todayString} value={formData.date} onChange={v => setFormData({...formData, date: v})} />
-                  <CompactInput label="Start *" type="time" value={formData.startTime} onChange={v => setFormData({...formData, startTime: v})} />
-                  <CompactInput label="End *" type="time" value={formData.endTime} onChange={v => setFormData({...formData, endTime: v})} />
-                  <CompactInput label="Deadline *" type="date" min={todayString} max={formData.date} value={formData.registrationDeadline} onChange={v => setFormData({...formData, registrationDeadline: v})} />
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                  <CompactInput label="Start Date *" type="date" min={todayString} value={formData.startDate} onChange={v => setFormData({...formData, startDate: v})} />
+                  <CompactInput label="End Date *" type="date" min={formData.startDate || todayString} value={formData.endDate} onChange={v => setFormData({...formData, endDate: v})} />
+                  <CompactInput label="Start Time *" type="time" value={formData.startTime} onChange={v => setFormData({...formData, startTime: v})} />
+                  <CompactInput label="End Time *" type="time" value={formData.endTime} onChange={v => setFormData({...formData, endTime: v})} />
+                  <CompactInput label="Deadline *" type="date" min={todayString} max={formData.startDate || ''} value={formData.registrationDeadline} onChange={v => setFormData({...formData, registrationDeadline: v})} />
                 </div>
+                {formData.startDate && formData.endDate && formData.startDate > formData.endDate && (
+                  <p className="text-red-500 text-[10px] font-black uppercase mt-1">
+                    End date cannot be before start date
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -323,29 +343,23 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
               <div className="flex flex-col gap-4 p-5 border border-indigo-100 bg-indigo-50/30 rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <Users size={18} className="text-indigo-600"/>
-                    <span className="text-[11px] font-black uppercase">Team Configuration</span>
+                     <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500"><Users size={14}/></div>
+                     <div>
+                        <h4 className="text-[11px] font-black uppercase tracking-wider">Team Event Activation</h4>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Toggle to define participant grouping rules</p>
+                     </div>
                   </div>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.teamEvent} 
-                    onChange={e => {
-                      const checked = e.target.checked;
-                      setFormData(prev => ({
-                        ...prev, 
-                        teamEvent: checked, 
-                        minTeamSize: checked ? (prev.minTeamSize > 1 ? prev.minTeamSize : 2) : 1, 
-                        maxTeamSize: checked ? (prev.maxTeamSize > 1 ? prev.maxTeamSize : 2) : 1
-                      }));
-                    }} 
-                    className="w-5 h-5 accent-indigo-600 cursor-pointer" 
-                  />
+                  <label className="relative flex items-center cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.teamEvent} onChange={e => setFormData({ ...formData, teamEvent: e.target.checked })} className="sr-only peer" />
+                    <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
                 </div>
+
                 {formData.teamEvent && (
-                  <div className="space-y-3">
+                  <div className="pt-4 border-t border-indigo-100/40 animate-in slide-in-from-top-2 duration-300">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Min Team Size</label>
+                      <div>
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">Min Team Size *</label>
                         <input 
                           type="number" 
                           min={1} 
@@ -354,8 +368,8 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
                           className="w-full p-2.5 bg-white border border-indigo-200 rounded-xl text-center font-bold text-xs" 
                         />
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Max Team Size</label>
+                      <div>
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">Max Team Size *</label>
                         <input 
                           type="number" 
                           min={1} 
@@ -377,7 +391,7 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
               <div className="flex justify-end pt-4">
                 <button 
                   type="button" 
-                  disabled={formData.teamEvent && formData.minTeamSize > formData.maxTeamSize}
+                  disabled={(formData.teamEvent && formData.minTeamSize > formData.maxTeamSize) || (formData.startDate && formData.endDate && formData.startDate > formData.endDate)}
                   onClick={() => validateStep1() && setStep(2)} 
                   className="bg-slate-900 text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-indigo-600 transition-all shadow-lg disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
@@ -431,7 +445,7 @@ export const OnePageCreateEventForm: React.FC<OnePageCreateEventFormProps> = ({ 
 
               <div className="flex gap-4">
                 <button type="button" onClick={() => setStep(1)} className="flex-1 py-4 border border-slate-200 rounded-xl text-[10px] font-black uppercase text-slate-400">Back</button>
-                <button type="submit" disabled={formData.teamEvent && formData.minTeamSize > formData.maxTeamSize} className="flex-[2] py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-100 flex justify-center items-center gap-2 hover:bg-emerald-700 transition-all disabled:bg-slate-300 disabled:cursor-not-allowed">
+                <button type="submit" disabled={(formData.teamEvent && formData.minTeamSize > formData.maxTeamSize) || (formData.startDate && formData.endDate && formData.startDate > formData.endDate)} className="flex-[2] py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-100 flex justify-center items-center gap-2 hover:bg-emerald-700 transition-all disabled:bg-slate-300 disabled:cursor-not-allowed">
                   {initialData ? 'Update & Resubmit' : 'Finalize & Submit'} <Send size={14}/>
                 </button>
               </div>
@@ -449,66 +463,42 @@ const SectionHeader = ({ label }: { label: string }) => (
   </h3>
 );
 
-const CompactInput = ({ label, value, onChange, type="text", min, max }: { label: string; value: any; onChange: (v: any) => void; type?: string; min?: string; max?: string }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">{label}</label>
-    <input 
-      type={type} 
-      value={value} 
-      min={min} 
-      max={max} 
-      onChange={e => onChange(e.target.value)} 
-      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 transition-all" 
-    />
+const CompactInput = ({ label, value, onChange, type = "text", min, max }: { label: string, value: any, onChange: (v: string) => void, type?: string, min?: any, max?: any }) => (
+  <div className="flex flex-col gap-1 w-full">
+    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">{label}</label>
+    <input type={type} min={min} max={max} value={value} onChange={e => onChange(e.target.value)} className="px-4 py-3 border border-slate-200 bg-white rounded-xl text-[11px] font-bold outline-none focus:border-indigo-500 transition-all" />
   </div>
 );
 
-const SelectionGroup = ({ label, items, selected, onToggle }: { label: string; items: any[]; selected: number[]; onToggle: (id: string | number) => void }) => (
+const SelectionGroup = ({ label, items, selected, onToggle }: { label: string, items: { id: any, name: string }[], selected: any[], onToggle: (id: any) => void }) => (
   <div className="space-y-4">
     <SectionHeader label={label} />
-    <div className="flex flex-wrap gap-2">
-      {items.map(i => (
-        <button 
-          key={i.id} 
-          type="button" 
-          onClick={() => onToggle(i.id)} 
-          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${selected.includes(parseInt(i.id)) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-100 hover:border-indigo-200'}`}
-        >
-          {i.name}
+    <div className="grid grid-cols-2 gap-2 p-5 bg-slate-50 border border-slate-100 rounded-2xl max-h-52 overflow-y-auto no-scrollbar">
+      {items.map(item => (
+        <button type="button" key={item.id} onClick={() => onToggle(item.id)} className={`flex items-center justify-between p-3.5 rounded-xl border-2 transition-all group ${selected.includes(Number(item.id)) ? 'bg-indigo-600 border-indigo-700 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-wide truncate ${selected.includes(Number(item.id)) ? 'text-white' : 'text-slate-700 group-hover:text-slate-900'}`}>{item.name}</span>
+          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${selected.includes(Number(item.id)) ? 'bg-indigo-500 border-indigo-400' : 'bg-white border-slate-200'}`}>
+            {selected.includes(Number(item.id)) && <div className="w-1.5 h-1.5 rounded-full bg-white animate-in zoom-in duration-200" />}
+          </div>
         </button>
       ))}
     </div>
   </div>
 );
 
-const AttachmentList = ({ title, icon, rows, onAdd, onRemove, onChange }: { title: string; icon: React.ReactNode; rows: Attachment[]; onAdd: () => void; onRemove: (i: number) => void; onChange: (i: number, f: 'key' | 'value', v: string) => void }) => (
+const AttachmentList = ({ title, icon, rows, onAdd, onRemove, onChange }: { title: string, icon: any, rows: Attachment[], onAdd: () => void, onRemove: (i: number) => void, onChange: (i: number, field: 'key'|'value', v: string) => void }) => (
   <div className="space-y-4">
     <div className="flex justify-between items-center px-2">
-      <div className="flex items-center gap-2">
-        <div className="text-indigo-600">{icon}</div>
-        <h4 className="text-[11px] font-black uppercase tracking-widest">{title}</h4>
-      </div>
-      <button type="button" onClick={onAdd} className="p-2 bg-slate-900 text-white rounded-lg shadow-sm">
-        <Plus size={14}/>
-      </button>
+      <div className="flex items-center gap-2"><div className="text-indigo-600">{icon}</div><h4 className="text-[11px] font-black uppercase tracking-widest">{title}</h4></div>
+      <button type="button" onClick={onAdd} className="p-2 bg-slate-900 text-white rounded-lg hover:bg-indigo-600 transition-all"><Plus size={14}/></button>
     </div>
     {rows.map((row, i) => (
-      <div key={i} className="flex gap-3 animate-in slide-in-from-bottom-2 duration-200">
-        <input 
-          value={row.key} 
-          onChange={e => onChange(i, 'key', e.target.value)} 
-          placeholder="Doc Name" 
-          className="w-1/3 px-4 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none" 
-        />
-        <input 
-          value={row.value} 
-          onChange={e => onChange(i, 'value', e.target.value)} 
-          placeholder="URL Link" 
-          className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none" 
-        />
-        <button type="button" onClick={() => onRemove(i)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
-          <Trash2 size={16}/>
-        </button>
+      <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-3 animate-in slide-in-from-bottom-2 duration-200">
+        <input value={row.key} onChange={e => onChange(i, 'key', e.target.value)} placeholder="Title / Label" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-bold uppercase outline-none focus:border-indigo-400" />
+        <div className="flex gap-2">
+          <input value={row.value} onChange={e => onChange(i, 'value', e.target.value)} placeholder="URL / Content Link" className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:border-indigo-400" />
+          {rows.length > 1 && <button type="button" onClick={() => onRemove(i)} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>}
+        </div>
       </div>
     ))}
   </div>

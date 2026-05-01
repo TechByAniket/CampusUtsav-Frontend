@@ -4,60 +4,23 @@ import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import type { Event } from "@/types/event";
 
-
 export type UpcomingEventCardProps = Event;
 
-// export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
-//   return (
-//     <div className='w-full h-full flex flex-col justify-start items-center rounded-[8px] cursor-pointer bg-white shadow-sm'>
-      
-//       {/* Image */}
-//       <div className="relative w-full h-full px-3 py-2"> 
-//         <span className='absolute top-4 left-3 px-2 text-xs text-center bg-gray-200 rounded-full'>
-//           {event.category}
-//         </span>
-        
-//         <img 
-//           src={event.posterUrl}
-//           alt={event.title}
-//           className='w-full h-full object-contain rounded-[8px]'
-//         />
-//       </div>
-
-//       {/* Content */}
-//       <div className='w-full px-4 py-2 flex flex-col justify-between gap-1'>
-//         <div className='flex flex-col'>
-//           <span className='text-base font-semibold line-clamp-1'>{event.title}</span>
-//           <span className='text-xs text-gray-600 flex gap-1 items-center truncate'>
-//             <MapPin size={14}/> {event.venue}
-//           </span>
-//         </div>    
-//         <div>
-//           <span className='text-xs font-medium'>{event.organizer.name}</span>
-//         </div>
-//       </div>
-
-//       {/* Date & Button */}
-//       <div className='w-full px-4 py-2 flex flex-col gap-2'>
-//         <div className='flex items-center gap-2'> 
-//           <CalendarDays className='!size-6 text-gray-700'/>
-//           <div className='flex flex-col'>
-//             <span className='text-xs font-semibold'>{event.date}</span>
-//             <span className='text-[10px] text-gray-600'>{event.time}</span>
-//           </div>
-//         </div>
-
-//         {/* Dynamic ID */}
-//         <Link to={`/college-dashboard/events/${event.id}`}>
-//           <Button size="sm" className='rounded-[6px] text-xs w-full'>
-//             View
-//           </Button>
-//         </Link>
-//       </div>
-
-//     </div>
-//   )
-// }
+const formatEventDate = (startDate: string, endDate: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
 
 export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
   return (
@@ -112,7 +75,7 @@ export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = (event) => {
           <CalendarDays size={12} />
           <div className="flex flex-col">
             <span className="font-semibold">
-              {new Date(event.date).toDateString()}
+              {formatEventDate(event.startDate, event.endDate)}
             </span>
             <span className="text-[10px]">
               {event.startTime} – {event.endTime}

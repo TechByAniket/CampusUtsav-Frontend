@@ -28,7 +28,7 @@ export const EventRequestCard: React.FC<{ item: any }> = ({ item }) => {
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <span className="font-medium text-slate-700">{item.club}</span>
             <span className="h-1 w-1 rounded-full bg-slate-300" />
-            <span>{item.date}</span>
+            <span>{item.startDate === item.endDate ? item.startDate : `${item.startDate} – ${item.endDate}`}</span>
           </div>
         </div>
 

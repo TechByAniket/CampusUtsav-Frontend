@@ -23,7 +23,8 @@ import { Button } from '@/components/ui/button';
 interface Event {
   id: number;
   title: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
   eventCategory: string;
@@ -37,6 +38,22 @@ interface Event {
   description?: string;
   fees?: number;
 }
+
+const formatEventDate = (startDate: string, endDate: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
 
 export const InboxList = ({ mode = 'COLLEGE' }) => {
   const [eventList, setEventList] = useState<Event[]>([]);
@@ -199,7 +216,7 @@ export const InboxList = ({ mode = 'COLLEGE' }) => {
                       <td className="px-8 py-5">
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2.5 text-[11px] font-black text-slate-700 uppercase tracking-tight">
-                            <Calendar className="size-3 text-indigo-500" /> {event.date}
+                            <Calendar className="size-3 text-indigo-500" /> {formatEventDate(event.startDate, event.endDate)}
                           </div>
                           <div className="flex items-center gap-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                             <MapPin className="size-3 text-slate-300" /> {event.venue?.slice(0, 25)}...
@@ -283,7 +300,7 @@ export const InboxList = ({ mode = 'COLLEGE' }) => {
                   <div className="p-10 space-y-10">
                     {/* KEY DETAILS IN A CAPSULE GRID */}
                     <div className="grid grid-cols-2 gap-4">
-                      <CapsuleDetail icon={<Calendar size={14} />} label="Date" value={selectedEvent.date} />
+                      <CapsuleDetail icon={<Calendar size={14} />} label="Date" value={formatEventDate(selectedEvent.startDate, selectedEvent.endDate)} />
                       <CapsuleDetail icon={<Clock size={14} />} label="Time" value={selectedEvent.startTime?.slice(0, 5)} />
                       <CapsuleDetail icon={<MapPin size={14} />} label="Venue" value={selectedEvent.venue} />
                       <CapsuleDetail icon={<Tag size={14} />} label="Category" value={selectedEvent.eventCategory} />

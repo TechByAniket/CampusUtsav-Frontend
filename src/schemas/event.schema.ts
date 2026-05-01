@@ -22,7 +22,8 @@ export const eventBasicSchema = z.object({
 
 export const eventScheduleSchema = z
   .object({
-    date: z.coerce.date(),
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
     start_time: z
       .string()
       .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid start time"),

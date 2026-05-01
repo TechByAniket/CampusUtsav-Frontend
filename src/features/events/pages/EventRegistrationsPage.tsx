@@ -7,6 +7,22 @@ import { getEventRegistrations, getEventDetailsByEventId } from '@/services/even
 import type { EventRegistrationsResponse, AdminEventDetail } from '@/types/event';
 import { RegistrationInfoList } from '../components/RegistrationInfoList';
 
+const formatEventDate = (startDate: string, endDate: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
+
 export const EventRegistrationsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -89,7 +105,7 @@ export const EventRegistrationsPage: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mt-4">
                             <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-100 rounded-full shadow-sm">
                                 <Calendar size={13} className="text-indigo-500" />
-                                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">{event.date}</span>
+                                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">{formatEventDate(event.startDate, event.endDate)}</span>
                             </div>
                             <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-100 rounded-full shadow-sm">
                                 <Clock size={13} className="text-indigo-500" />

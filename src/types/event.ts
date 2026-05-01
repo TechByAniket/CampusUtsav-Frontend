@@ -33,7 +33,8 @@ export interface UpcomingEventCardProps {
   imageUrl: string
   venue: string
   organizer: string
-  date: string
+  startDate: string
+  endDate: string
   time: string
 }
 
@@ -47,7 +48,8 @@ export type Event = {
 
   venue: string;
 
-  date: string;        // ISO date string (yyyy-MM-dd)
+  startDate: string;
+  endDate: string;        // ISO date string (yyyy-MM-dd)
   startTime: string;   // HH:mm:ss
   endTime: string;     // HH:mm:ss
 
@@ -109,7 +111,8 @@ export type Event = {
 export interface EventSummary {
   id: number;
   title: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
   eventCategory: string;
@@ -133,7 +136,8 @@ export interface AdminEventDetail {
   description: string;
   posterUrl: string;
   venue: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   registrationDeadline: string;
   startTime: string;
   endTime: string;

@@ -146,7 +146,8 @@ export const PublicEventDetailsPage = () => {
                 category={event.eventCategory}
                 venue={event.venue}
                 stats={coreStats}
-                date={event.date}
+                startDate={event.startDate}
+                endDate={event.endDate}
                 deadline={event.registrationDeadline}
                 eventId={event.id}
                 minTeamSize={event.minTeamSize}

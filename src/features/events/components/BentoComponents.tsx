@@ -26,6 +26,22 @@ const getStatusStyles = (status: string) => {
   }
 }
 
+const formatEventDate = (startDate: string, endDate: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
+
 export const BentoBadge = ({ label, value, icon: Icon, color = "indigo" }: { label: string, value: string, icon: any, color?: string }) => (
   <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-md hover:shadow-xl hover:border-indigo-100 transition-all group flex flex-col justify-center h-full">
     <div className="flex items-center gap-3 mb-3">
@@ -54,12 +70,12 @@ interface HeroStat {
 
 export const BentoHeroDetail = ({ 
   title, status, category, venue, 
-  stats, date, deadline, eventId, minTeamSize = 1, maxTeamSize = 1, isTeamEvent = false,
+  stats, startDate, endDate, deadline, eventId, minTeamSize = 1, maxTeamSize = 1, isTeamEvent = false,
   isEligible = true, ineligibilityReason = "",
   allowedBranches = {}, allowedYears = {}
 }: { 
   title: string, status: string, category: string, venue: string,
-  stats: HeroStat[], date: string, deadline: string, eventId: number, minTeamSize?: number, maxTeamSize?: number,
+  stats: HeroStat[], startDate: string, endDate: string, deadline: string, eventId: number, minTeamSize?: number, maxTeamSize?: number,
   isTeamEvent?: boolean,
   isEligible?: boolean, ineligibilityReason?: string,
   allowedBranches?: Record<string, string>, allowedYears?: Record<string, string>
@@ -68,7 +84,6 @@ export const BentoHeroDetail = ({
   const role = useSelector((state: RootState) => state.auth.role);
   const statusConfig = getStatusStyles(status);
   const StatusIcon = statusConfig.icon;
-
 
   const handleShare = async () => {
     const shareData = {
@@ -104,7 +119,7 @@ export const BentoHeroDetail = ({
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-100/50 rounded-full shadow-sm">
                  <Calendar size={12} />
-                 <span className="text-[9px] font-black uppercase tracking-[0.2em]">{date}</span>
+                 <span className="text-[9px] font-black uppercase tracking-[0.2em]">{formatEventDate(startDate, endDate)}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 text-slate-500 border border-slate-200 rounded-full shadow-sm">
                  <LayoutDashboard size={12} />
@@ -120,7 +135,6 @@ export const BentoHeroDetail = ({
               </button>
            </div>
         </div>
-
 
         {/* Major Identity Title */}
         <h1 className="text-2xl md:text-4xl font-black text-slate-900 leading-[1.05] tracking-tight group-hover:text-indigo-600 transition-colors">

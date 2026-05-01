@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 export interface StudentRegistration {
   eventId: number;
   eventTitle: string;
-  eventDate: string;
+  eventStartDate: string;
+  eventEndDate: string;
   startTime: string;
   endTime: string;
   attendanceActive: boolean;

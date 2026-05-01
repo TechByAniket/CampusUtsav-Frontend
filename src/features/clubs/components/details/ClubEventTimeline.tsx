@@ -14,12 +14,12 @@ export const ClubEventTimeline: React.FC<ClubEventTimelineProps> = ({ events }) 
   const now = new Date();
   
   const upcomingEvents = events.filter(e => {
-    const eventDate = new Date(e.date);
+    const eventDate = new Date(e.endDate || e.startDate);
     return eventDate >= now || eventDate.toDateString() === now.toDateString();
   });
 
   const pastEvents = events.filter(e => {
-    const eventDate = new Date(e.date);
+    const eventDate = new Date(e.endDate || e.startDate);
     return eventDate < now && eventDate.toDateString() !== now.toDateString();
   });
 

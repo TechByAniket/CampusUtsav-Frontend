@@ -9,13 +9,30 @@ interface Event {
   posterUrl: string;
   eventCategory: string;
   venue?: string;
-  date?: string;
+  startDate?: string;
+  endDate?: string;
   isFeatured?: boolean;
 }
 
 interface FeaturedEventsProps {
   events: Event[];
 }
+
+const formatEventDate = (startDate?: string, endDate?: string) => {
+  if (!startDate) return "";
+  if (!endDate || startDate === endDate) {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } else {
+    const d1 = new Date(startDate);
+    const d2 = new Date(endDate);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${startDate} – ${endDate}`;
+    const day1 = d1.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const day2 = d2.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `${day1} – ${day2}`;
+  }
+};
 
 const getCategoryIcon = (category: string) => {
   switch (category.toUpperCase()) {
@@ -80,7 +97,7 @@ export const FeaturedEvents: React.FC<FeaturedEventsProps> = ({ events }) => {
                  </div>
                  <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Scheduled Date</p>
-                    <p className="text-xl font-black text-white">{events[0].date}</p>
+                    <p className="text-xl font-black text-white">{formatEventDate(events[0].startDate, events[0].endDate)}</p>
                  </div>
               </div>
 
@@ -118,7 +135,7 @@ export const FeaturedEvents: React.FC<FeaturedEventsProps> = ({ events }) => {
                   <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     <span>📍 {event.venue}</span>
                     <span className="opacity-30">•</span>
-                    <span>{event.date}</span>
+                    <span>{formatEventDate(event.startDate, event.endDate)}</span>
                   </div>
                   <div className="h-12 w-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">
                     <ArrowRight size={20} />
