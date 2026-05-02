@@ -30,24 +30,24 @@ export const EventRegistrationsPage: React.FC = () => {
   const [event, setEvent] = useState<AdminEventDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!id) return;
-      try {
-        setLoading(true);
-        const [regData, eventData] = await Promise.all([
-          getEventRegistrations(id),
-          getEventDetailsByEventId(id)
-        ]);
-        setRegistrations(regData);
-        setEvent(eventData);
-      } catch (error: any) {
-        toast.error(error.message || "Failed to load records");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      const [regData, eventData] = await Promise.all([
+        getEventRegistrations(id),
+        getEventDetailsByEventId(id)
+      ]);
+      setRegistrations(regData);
+      setEvent(eventData);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to load records");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [id]);
 
@@ -71,7 +71,7 @@ export const EventRegistrationsPage: React.FC = () => {
   }
 
   return (
-    <section className="w-full min-h-screen bg-slate-50/30 pt-0 pb-10 px-4 md:px-10 lg:px-16 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
+    <section className="w-full min-h-screen bg-slate-50/30 pt-0 pb-10 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900 -mt-6">
       <div className="max-w-[1550px] mx-auto space-y-12 relative">
         
         {/* Navigation & Informative Header (Floating) */}
@@ -141,6 +141,7 @@ export const EventRegistrationsPage: React.FC = () => {
             <RegistrationInfoList 
               registrations={registrations} 
               isTeamEvent={event.teamEvent} 
+              onRefresh={fetchData}
             />
         </div>
       </div>

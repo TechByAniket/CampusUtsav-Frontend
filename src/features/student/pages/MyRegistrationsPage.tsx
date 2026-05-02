@@ -13,8 +13,110 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
+interface MultiSelectProps {
+  label: string;
+  options: string[];
+  selected: string[];
+  onToggle: (val: string) => void;
+  onClear: () => void;
+  icon: any;
+  colorTheme?: 'indigo' | 'orange' | 'emerald';
+}
+
+const MultiSelect = ({ 
+  label, 
+  options, 
+  selected, 
+  onToggle, 
+  onClear,
+  icon: Icon,
+  colorTheme = 'indigo'
+}: MultiSelectProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const themes = {
+    indigo: {
+      bg: 'bg-indigo-50',
+      border: 'border-indigo-100',
+      text: 'text-indigo-700',
+      hover: 'hover:bg-indigo-100',
+      check: 'bg-indigo-600 border-indigo-600',
+      icon: 'text-indigo-400'
+    },
+    orange: {
+      bg: 'bg-orange-50',
+      border: 'border-orange-100',
+      text: 'text-orange-700',
+      hover: 'hover:bg-orange-100',
+      check: 'bg-orange-600 border-orange-600',
+      icon: 'text-orange-400'
+    },
+    emerald: {
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-100',
+      text: 'text-emerald-700',
+      hover: 'hover:bg-emerald-100',
+      check: 'bg-emerald-600 border-emerald-600',
+      icon: 'text-emerald-400'
+    }
+  };
+
+  const theme = themes[colorTheme];
+  
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 ${theme.bg} border ${theme.border} rounded-xl px-4 py-2.5 text-[11px] font-black ${theme.text} outline-none transition-all ${theme.hover} min-w-[140px] justify-between shadow-sm group`}
+      >
+        <div className="flex items-center gap-2">
+            <Icon size={14} className={theme.icon} />
+            <span className="uppercase tracking-widest whitespace-nowrap">
+            {selected.length === 0 ? `ALL ${label}S` : `${selected.length} ${label}${selected.length > 1 ? 'S' : ''}`}
+            </span>
+        </div>
+        <ChevronDown size={14} className={`transition-transform duration-300 opacity-40 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+             <div className="max-h-60 overflow-y-auto custom-scrollbar py-1">
+                {options.map(opt => (
+                  <label key={opt} className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors group/item">
+                    <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center shrink-0 ${selected.includes(opt) ? theme.check : 'border-slate-300 group-hover/item:border-indigo-400'}`}>
+                      {selected.includes(opt) && <Check size={10} className="text-white stroke-[4]" />}
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      className="hidden" 
+                      checked={selected.includes(opt)}
+                      onChange={() => onToggle(opt)}
+                    />
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight truncate">{opt}</span>
+                  </label>
+                ))}
+             </div>
+             {selected.length > 0 && (
+               <button 
+                 onClick={(e) => { e.stopPropagation(); onClear(); }}
+                 className="w-full mt-1 pt-2 border-t border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-rose-500 transition-colors py-2"
+               >
+                 Clear Selections
+               </button>
+             )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export interface StudentRegistration {
   eventId: number;
+  registrationId?: number;
+  teamId?: number;
   eventTitle: string;
   eventStartDate: string;
   eventEndDate: string;
@@ -28,6 +130,9 @@ export interface StudentRegistration {
   markedAt: string | null;
   registrationType: 'INDIVIDUAL' | 'TEAM';
   teamName: string | null;
+  teamMemberId?: number;
+  leader?: boolean;
+  registrationDeadline?: string;
 }
 
 const MyRegistrationsPage: React.FC = () => {
@@ -105,83 +210,35 @@ const MyRegistrationsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-               {/* --- FILTER DROPDOWN --- */}
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className={`
-                        h-12 px-6 rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest flex items-center gap-3 transition-all
-                        ${activeFilterCount > 0 ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 hover:bg-slate-50'}
-                      `}
-                    >
-                       <Filter size={14} className={activeFilterCount > 0 ? 'text-white' : 'text-slate-400'} />
-                       <span>Filters</span>
-                       {activeFilterCount > 0 && (
-                         <span className="w-5 h-5 bg-white text-indigo-600 rounded-full flex items-center justify-center text-[9px] font-black">
-                            {activeFilterCount}
-                         </span>
-                       )}
-                       <ChevronDown size={14} className={activeFilterCount > 0 ? 'text-white/60' : 'text-slate-300'} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 rounded-3xl p-2 shadow-2xl border-slate-100 font-jakarta">
-                    <DropdownMenuLabel className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 py-2">Attendance Status</DropdownMenuLabel>
-                    <DropdownMenuCheckboxItem
-                      checked={selectedAttendance.includes('present')}
-                      onCheckedChange={() => toggleFilter(selectedAttendance, setSelectedAttendance, 'present')}
-                      className="rounded-xl text-[11px] font-bold text-slate-700 uppercase tracking-tight py-2.5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-emerald-500" /> Present
-                      </div>
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={selectedAttendance.includes('absent')}
-                      onCheckedChange={() => toggleFilter(selectedAttendance, setSelectedAttendance, 'absent')}
-                      className="rounded-xl text-[11px] font-bold text-slate-700 uppercase tracking-tight py-2.5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <XCircle size={14} className="text-rose-500" /> Absent
-                      </div>
-                    </DropdownMenuCheckboxItem>
-                    
-                    <DropdownMenuSeparator className="my-2 bg-slate-50" />
-                    
-                    <DropdownMenuLabel className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 py-2">Registration Type</DropdownMenuLabel>
-                    <DropdownMenuCheckboxItem
-                      checked={selectedType.includes('INDIVIDUAL')}
-                      onCheckedChange={() => toggleFilter(selectedType, setSelectedType, 'INDIVIDUAL')}
-                      className="rounded-xl text-[11px] font-bold text-slate-700 uppercase tracking-tight py-2.5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <User size={14} className="text-sky-500" /> Individual
-                      </div>
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={selectedType.includes('TEAM')}
-                      onCheckedChange={() => toggleFilter(selectedType, setSelectedType, 'TEAM')}
-                      className="rounded-xl text-[11px] font-bold text-slate-700 uppercase tracking-tight py-2.5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Users size={14} className="text-indigo-500" /> Team
-                      </div>
-                    </DropdownMenuCheckboxItem>
+            <div className="flex flex-wrap items-center gap-3">
+              <MultiSelect
+                label="ATTENDANCE"
+                options={['present', 'absent']}
+                selected={selectedAttendance}
+                onToggle={(v) => toggleFilter(selectedAttendance, setSelectedAttendance, v)}
+                onClear={() => setSelectedAttendance([])}
+                icon={CheckCircle2}
+                colorTheme="emerald"
+              />
 
-                    {activeFilterCount > 0 && (
-                      <>
-                        <DropdownMenuSeparator className="my-2 bg-slate-50" />
-                        <button 
-                          onClick={() => { setSelectedAttendance([]); setSelectedType([]); }}
-                          className="w-full flex items-center justify-center gap-2 py-2.5 text-[9px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-50 rounded-xl transition-colors"
-                        >
-                          <X size={12} /> Clear All
-                        </button>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-               </DropdownMenu>
+              <MultiSelect
+                label="TYPE"
+                options={['INDIVIDUAL', 'TEAM']}
+                selected={selectedType}
+                onToggle={(v) => toggleFilter(selectedType, setSelectedType, v)}
+                onClear={() => setSelectedType([])}
+                icon={Users}
+                colorTheme="indigo"
+              />
+
+              {activeFilterCount > 0 && (
+                <button 
+                  onClick={() => { setSelectedAttendance([]); setSelectedType([]); }}
+                  className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-rose-500 px-2 transition-colors"
+                >
+                  Reset
+                </button>
+              )}
             </div>
           </div>
         </div>

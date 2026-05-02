@@ -191,6 +191,7 @@ export interface TeamRegistration {
   members: RegistrationStudent[];
   paymentDone: boolean;
   registeredAt: string;
+  status?: string;
 }
 
 export interface IndividualRegistration {
@@ -198,6 +199,7 @@ export interface IndividualRegistration {
   student: RegistrationStudent;
   paymentDone: boolean;
   registeredAt: string;
+  status?: string;
 }
 
 export interface EventRegistrationsResponse {

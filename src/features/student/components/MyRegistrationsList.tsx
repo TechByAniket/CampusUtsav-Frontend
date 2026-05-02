@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Calendar, MapPin, Clock, Tag, CheckCircle2, 
-  AlertCircle, ArrowUpRight, Loader2, Sparkles, Users
+  AlertCircle, ArrowUpRight, Loader2, Sparkles, Users,
+  X, UserCircle, ShieldCheck, Mail, Smartphone, Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 import { markAttendance } from '@/services/eventAttendanceService';
+import { leaveTeam, getTeamMembers, addMember, removeMember } from '@/services/teamService';
+import { cancelEventRegistration } from '@/services/eventRegistrationService';
+import { getMyStudentProfileDetails, getAllStudentsByCollege } from '@/services/studentService';
+import { fetchTeamMembersMetaData } from '@/services/eventService';
 import type { StudentRegistration } from '../pages/MyRegistrationsPage';
 
 import QRScannerModal from './QRScannerModal';
@@ -25,6 +31,8 @@ const formatEventDate = (startDate: string, endDate: string) => {
   }
 };
 
+import { ViewTeamModal } from './ViewTeamModal';
+
 type MyRegistrationsListProps = {
   registrations: StudentRegistration[];
   onRefresh: () => void;
@@ -34,6 +42,8 @@ export const MyRegistrationsList = ({ registrations, onRefresh }: MyRegistration
   const [markingId, setMarkingId] = useState<number | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [activeEvent, setActiveEvent] = useState<{ id: number, title: string } | null>(null);
+  
+  const [selectedTeamReg, setSelectedTeamReg] = useState<StudentRegistration | null>(null);
 
   const handleStartScan = (eventId: number, title: string) => {
     setActiveEvent({ id: eventId, title });
@@ -57,6 +67,46 @@ export const MyRegistrationsList = ({ registrations, onRefresh }: MyRegistration
     }
   };
 
+  const isBeforeDeadline = (deadlineStr?: string, eventStartDate?: string) => {
+    const now = new Date();
+    if (deadlineStr) {
+      return now < new Date(deadlineStr);
+    }
+    if (eventStartDate) {
+      return now < new Date(eventStartDate);
+    }
+    return true;
+  };
+
+  const handleLeaveTeam = async (teamMemberId: number, eventTitle: string) => {
+    try {
+      setMarkingId(teamMemberId);
+      const res = await leaveTeam(teamMemberId);
+      toast.success(typeof res === 'string' ? res : `Successfully left the team for ${eventTitle}`);
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to leave team");
+    } finally {
+      setMarkingId(null);
+    }
+  };
+
+  const handleCancelRegistration = async (registrationId: number, eventTitle: string) => {
+    try {
+      setMarkingId(registrationId);
+      const res = await cancelEventRegistration(registrationId);
+      toast.success(typeof res === 'string' ? res : `Successfully cancelled registration for ${eventTitle}`);
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to cancel registration");
+    } finally {
+      setMarkingId(null);
+    }
+  };
+
+  const handleViewTeam = (reg: StudentRegistration) => {
+    setSelectedTeamReg(reg);
+  };
 
   if (registrations.length === 0) {
     return (
@@ -110,16 +160,43 @@ export const MyRegistrationsList = ({ registrations, onRefresh }: MyRegistration
                         </div>
                     </div>
 
-                    {!reg.attendanceMarked && reg.attendanceActive && (
-                        <button 
-                            onClick={() => handleStartScan(reg.eventId, reg.eventTitle)}
-                            disabled={markingId === reg.eventId}
-                            className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-700 transition-all active:scale-95 shadow-lg shadow-orange-100"
-                        >
-                            {markingId === reg.eventId ? <Loader2 size={14} className="animate-spin" /> : <ArrowUpRight size={14} />}
-                            Mark Attendance
-                        </button>
-                    )}
+                    <div className="flex flex-col gap-2">
+                        {reg.attendanceMarked ? (
+                            <div className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest bg-slate-50 border border-slate-100 rounded-xl py-2">
+                                COMPLETED
+                            </div>
+                        ) : reg.attendanceActive ? (
+                            <button 
+                                onClick={() => handleStartScan(reg.eventId, reg.eventTitle)}
+                                disabled={markingId === reg.eventId}
+                                className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-700 transition-all active:scale-95 shadow-lg shadow-orange-100"
+                            >
+                                {markingId === reg.eventId ? <Loader2 size={14} className="animate-spin" /> : <ArrowUpRight size={14} />}
+                                Mark Attendance
+                            </button>
+                        ) : isBeforeDeadline(reg.registrationDeadline, reg.eventStartDate) ? (
+                            reg.registrationType === 'INDIVIDUAL' ? (
+                                <button 
+                                    onClick={() => handleCancelRegistration(reg.registrationId || reg.eventId || (reg as any).id, reg.eventTitle)}
+                                    disabled={markingId === (reg.registrationId || reg.eventId || (reg as any).id)}
+                                    className="w-full py-3 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 text-rose-600 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 mt-1"
+                                >
+                                    {markingId === (reg.registrationId || reg.eventId || (reg as any).id) ? <Loader2 size={12} className="animate-spin" /> : "Cancel Registration"}
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={() => handleViewTeam(reg)}
+                                    className="w-full py-3 bg-slate-900 hover:bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 mt-1"
+                                >
+                                    View Team
+                                </button>
+                            )
+                        ) : (
+                            <div className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest bg-slate-50 border border-slate-100 rounded-xl py-2">
+                                WAITING
+                            </div>
+                        )}
+                    </div>
                 </div>
             ))}
         </div>
@@ -209,26 +286,49 @@ export const MyRegistrationsList = ({ registrations, onRefresh }: MyRegistration
                             </td>
 
                             <td className="px-6 py-5 text-center">
-                                {!reg.attendanceMarked && reg.attendanceActive ? (
-                                    <button 
-                                        onClick={() => handleStartScan(reg.eventId, reg.eventTitle)}
-                                        disabled={markingId === reg.eventId}
-                                        className="group/btn relative px-6 py-3 bg-orange-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all active:scale-95 flex items-center gap-2 mx-auto shadow-lg shadow-orange-100"
-                                    >
-                                        {markingId === reg.eventId ? (
-                                            <Loader2 size={14} className="animate-spin text-white" />
-                                        ) : (
-                                            <>
-                                                <span>Mark Presence</span>
-                                                <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                            </>
-                                        )}
-                                    </button>
-                                ) : (
-                                    <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
-                                        {reg.attendanceMarked ? "COMPLETED" : "WAITING"}
-                                    </div>
-                                )}
+                                <div className="flex flex-col gap-2 items-center">
+                                     {reg.attendanceMarked ? (
+                                         <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
+                                             COMPLETED
+                                         </div>
+                                     ) : reg.attendanceActive ? (
+                                         <button 
+                                             onClick={() => handleStartScan(reg.eventId, reg.eventTitle)}
+                                             disabled={markingId === reg.eventId}
+                                             className="group/btn relative px-6 py-3 bg-orange-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all active:scale-95 flex items-center gap-2 mx-auto shadow-lg shadow-orange-100"
+                                         >
+                                             {markingId === reg.eventId ? (
+                                                 <Loader2 size={14} className="animate-spin text-white" />
+                                             ) : (
+                                                 <>
+                                                     <span>Mark Presence</span>
+                                                     <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                 </>
+                                             )}
+                                         </button>
+                                     ) : isBeforeDeadline(reg.registrationDeadline, reg.eventStartDate) ? (
+                                         reg.registrationType === 'INDIVIDUAL' ? (
+                                             <button 
+                                                 onClick={() => handleCancelRegistration(reg.registrationId || reg.eventId || (reg as any).id, reg.eventTitle)}
+                                                 disabled={markingId === (reg.registrationId || reg.eventId || (reg as any).id)}
+                                                 className="px-4 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 text-rose-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 mt-1"
+                                             >
+                                                 {markingId === (reg.registrationId || reg.eventId || (reg as any).id) ? <Loader2 size={12} className="animate-spin" /> : "Cancel Registration"}
+                                             </button>
+                                         ) : (
+                                             <button 
+                                                 onClick={() => handleViewTeam(reg)}
+                                                 className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 mt-1"
+                                             >
+                                                 View Team
+                                             </button>
+                                         )
+                                     ) : (
+                                         <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
+                                             WAITING
+                                         </div>
+                                     )}
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -243,6 +343,20 @@ export const MyRegistrationsList = ({ registrations, onRefresh }: MyRegistration
             onScanSuccess={handleScanSuccess}
             eventTitle={activeEvent?.title || ""}
         />
+
+        {/* View Team Modal */}
+        <AnimatePresence>
+          {selectedTeamReg && (
+            <ViewTeamModal
+              isOpen={!!selectedTeamReg}
+              onClose={() => setSelectedTeamReg(null)}
+              teamId={selectedTeamReg.teamId!}
+              teamName={selectedTeamReg.teamName || "Your Team"}
+              reg={selectedTeamReg}
+              onRefresh={onRefresh}
+            />
+          )}
+        </AnimatePresence>
     </div>
   );
 };
